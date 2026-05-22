@@ -3,1047 +3,445 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>English Teaching Board</title>
-<style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+<title>English Teaching Board · v2</title>
 
-:root {
-  /* Pink ombre palette */
-  --pink: #db2777; --pink-d: #9d174d; --pink-dd: #831843;
-  --pink-l: #fce7f3; --pink-ll: #fdf2f8; --pink-m: #f9a8d4; --pink-mm: #fbcfe8;
-  --rose: #f43f5e; --fuchsia: #c026d3; --fuchsia-l: #fae8ff;
-  --green: #16a34a; --green-l: #f0fdf4;
-  --orange: #ea580c; --orange-l: #fff7ed; --amber:#d97706;
-  --red: #dc2626;
-  --g50: #fafafa; --g100: #f4f4f5; --g200: #e7e5e8; --g300: #d4d4d8;
-  --g400: #a1a1aa; --g500: #71717a; --g600: #52525b; --g700: #3f3f46;
-  --g800: #27272a; --g900: #18181b; --white: #fff;
-  --sh: 0 1px 3px rgba(157,23,77,.08); --sh-md:0 4px 14px rgba(157,23,77,.1);
-  --sh-lg: 0 12px 32px rgba(157,23,77,.16);
-  --r: 8px; --r-lg: 12px; --r-xl: 18px;
-  --ombre: linear-gradient(135deg, var(--pink) 0%, var(--fuchsia) 100%);
-  --ombre-soft: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 45%, #fae8ff 100%);
-}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--g50); color: var(--g800); height: 100vh; overflow: hidden; }
-
-/* VIEWS */
-.view { position: absolute; inset: 0; display: none; flex-direction: column; }
-.view.active { display: flex; }
-
-/* UTIL */
-.w-full{width:100%} .flex{display:flex} .flex-1{flex:1} .items-center{align-items:center}
-.gap-2{gap:8px} .gap-3{gap:12px} .text-sm{font-size:13px} .text-muted{color:var(--g500)} .font-bold{font-weight:700}
-.hidden{display:none!important}
-
-/* BUTTONS */
-.btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:var(--r);
-  border:none; cursor:pointer; font-size:14px; font-weight:600; transition:all .15s; white-space:nowrap; font-family:inherit; }
-.btn:active{transform:scale(.98)}
-.btn-primary{background:var(--ombre);color:#fff}
-.btn-primary:hover{filter:brightness(1.07)}
-.btn-secondary{background:var(--pink-l);color:var(--pink-d)}
-.btn-secondary:hover{background:var(--pink-mm)}
-.btn-success{background:var(--green);color:#fff}
-.btn-success:hover{background:#15803d}
-.btn-danger{background:var(--red);color:#fff}
-.btn-danger:hover{background:#b91c1c}
-.btn-outline{background:#fff;border:1.5px solid var(--pink-m);color:var(--pink-d)}
-.btn-outline:hover{border-color:var(--pink);background:var(--pink-ll)}
-.btn-ghost{background:transparent;color:var(--g600);border:none}
-.btn-ghost:hover{background:var(--pink-l)}
-.btn-lg{padding:12px 24px;font-size:16px;border-radius:var(--r-lg)}
-.btn-sm{padding:5px 10px;font-size:12px}
-.btn-icon{padding:8px;border-radius:6px}
-
-/* INPUTS */
-.input{ width:100%; padding:8px 12px; border:1.5px solid var(--g200); border-radius:var(--r);
-  font-size:14px; color:var(--g800); background:#fff; transition:border-color .15s; outline:none; font-family:inherit; }
-.input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(219,39,119,.12)}
-.input-lg{padding:12px 16px;font-size:16px}
-textarea.input{resize:vertical}
-select.input{cursor:pointer}
-.label{display:block;font-size:11px;font-weight:700;color:var(--g500);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
-.form-group{margin-bottom:16px}
-
-/* BADGE */
-.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:700}
-.badge-pink{background:var(--pink-l);color:var(--pink-d)}
-.badge-green{background:var(--green-l);color:var(--green)}
-.badge-fuchsia{background:var(--fuchsia-l);color:var(--fuchsia)}
-
-/* CHIP TOGGLE */
-.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;
-  border:1.5px solid var(--g200);background:#fff;color:var(--g600);cursor:pointer;transition:all .15s;font-family:inherit}
-.chip:hover{border-color:var(--pink-m)}
-.chip.on{background:var(--ombre);color:#fff;border-color:transparent}
-.chip-suggest{border-style:dashed;border-color:var(--pink-m);color:var(--pink-d)}
-.chip-suggest:hover{background:var(--pink-ll)}
-
-/* ═══════════ DASHBOARD ═══════════ */
-#view-dashboard{background:var(--ombre-soft);overflow-y:auto;align-items:center;padding:40px 20px}
-.dash-wrap{width:100%;max-width:920px;margin:0 auto}
-.dash-hero{text-align:center;margin-bottom:38px}
-.dash-hero .app-icon{font-size:54px;margin-bottom:10px}
-.dash-hero h1{font-size:32px;font-weight:900;color:var(--pink-dd);margin-bottom:6px}
-.dash-hero p{color:var(--pink-d);font-size:15px;opacity:.85}
-.live-clock{display:inline-block;margin-top:14px;background:#fff;border:1px solid var(--pink-l);color:var(--pink-d);padding:8px 20px;border-radius:100px;font-size:14px;font-weight:700;box-shadow:var(--sh);text-transform:capitalize;font-variant-numeric:tabular-nums}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
-.stat-card{background:#fff;border-radius:var(--r-xl);padding:24px;text-align:center;border:1px solid var(--pink-l);box-shadow:var(--sh-md)}
-.stat-val{font-size:44px;font-weight:900;line-height:1;margin-bottom:6px;background:var(--ombre);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.stat-lbl{font-size:13px;color:var(--g500);font-weight:600}
-.dash-actions{display:flex;gap:12px;justify-content:center;margin-bottom:34px}
-.section-title{font-size:15px;font-weight:800;color:var(--pink-dd);margin-bottom:12px}
-.session-row{background:#fff;border:1px solid var(--pink-l);border-radius:var(--r-lg);padding:14px 18px;margin-bottom:8px;
-  display:flex;align-items:center;gap:14px;transition:box-shadow .15s}
-.session-row:hover{box-shadow:var(--sh-md)}
-.sess-day{width:44px;height:44px;background:var(--ombre);color:#fff;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;flex-shrink:0}
-.sess-info{flex:1;min-width:0}
-.sess-topic{font-weight:700;color:var(--g800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sess-meta{font-size:12px;color:var(--g500);margin-top:2px}
-.sess-score{font-size:22px;font-weight:900;color:var(--pink);flex-shrink:0}
-
-/* ═══════════ PAGE HEADER ═══════════ */
-.page-header{background:#fff;border-bottom:1px solid var(--pink-l);padding:14px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10}
-.page-header h2{font-size:18px;font-weight:800;flex:1;color:var(--pink-dd)}
-
-/* ═══════════ SETUP ═══════════ */
-#view-setup{background:var(--g50);overflow-y:auto}
-.setup-body{max-width:1080px;margin:0 auto;padding:24px}
-.setup-top-row{display:grid;grid-template-columns:1fr 92px 78px 84px auto;gap:12px;align-items:end;margin-bottom:20px}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;align-items:start}
-.section-card{background:#fff;border:1px solid var(--pink-l);border-radius:var(--r-xl);overflow:hidden;margin-bottom:20px}
-.section-card-header{padding:12px 18px;border-bottom:1px solid var(--pink-l);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.section-card-header h3{font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;color:var(--pink-dd)}
-.section-card-body{padding:16px 18px}
-
-/* questions */
-.q-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
-.q-row .q-num{font-size:12px;color:var(--g400);padding-top:9px;width:18px;flex-shrink:0;text-align:right;font-weight:700}
-
-/* vocab cards in setup */
-.vcard{border:1px solid var(--g200);border-radius:var(--r-lg);padding:10px;margin-bottom:10px;background:var(--g50)}
-.vcard-top{display:flex;gap:6px;margin-bottom:6px}
-.vcard-top .v-w{flex:1.4} .vcard-top .v-ph{flex:1.1}
-.vcard .v-pos{margin-bottom:6px}
-.vcard .v-m{margin-bottom:6px}
-.vcard-actions{display:flex;gap:6px;margin-top:6px}
-
-/* flashcard config */
-.fc-config{background:var(--fuchsia-l);border:1px dashed var(--pink-m);border-radius:var(--r-lg);padding:12px;margin-bottom:14px}
-.fc-config .cfg-label{font-size:11px;font-weight:800;color:var(--pink-d);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.fc-config .cfg-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-
-/* patterns */
-.pattern-row{background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);padding:12px;margin-bottom:8px}
-
-/* grammar suggest */
-.gram-suggest-box{margin-bottom:12px}
-.gram-suggest-box .gs-title{font-size:12px;font-weight:700;color:var(--pink-d);margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.gram-chips{display:flex;flex-wrap:wrap;gap:6px}
-
-/* ═══════════ TEACH (control) ═══════════ */
-#view-teach{flex-direction:row;height:100vh;overflow:hidden;background:linear-gradient(135deg,var(--pink-dd) 0%,#4a044e 100%)}
-#teach-bar{position:absolute;top:0;left:0;right:0;height:54px;background:rgba(72,7,40,.92);backdrop-filter:blur(8px);
-  display:flex;align-items:center;padding:0 16px;gap:14px;z-index:100;border-bottom:1px solid rgba(255,255,255,.1)}
-.t-logo{font-size:14px;font-weight:900;color:#fff;letter-spacing:.5px;flex-shrink:0}
-.t-topic{flex:1;text-align:center}
-.t-topic h2{font-size:17px;font-weight:800;color:#fff}
-.t-topic span{font-size:11px;color:rgba(255,255,255,.5)}
-.t-meta{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.day-pill{background:var(--ombre);color:#fff;padding:3px 11px;border-radius:100px;font-size:12px;font-weight:700}
-.timer-btn{font-size:21px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:1px;cursor:pointer;
-  padding:3px 12px;border-radius:var(--r);border:1.5px solid rgba(255,255,255,.25);background:none;font-family:'Courier New',monospace;transition:all .2s}
-.timer-btn:hover{border-color:rgba(255,255,255,.6)}
-.timer-btn.warn{color:#fbbf24;border-color:#fbbf24}
-.timer-btn.over{color:#fb7185;border-color:#fb7185;animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* sidebar */
-#teach-sidebar{width:200px;flex-shrink:0;height:100vh;padding-top:54px;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.08)}
-.sidebar-nav{padding:14px 10px;flex:1;overflow-y:auto}
-.nav-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);padding:0 8px;margin:14px 0 6px}
-.nav-label:first-child{margin-top:0}
-.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r);color:rgba(255,255,255,.6);cursor:pointer;
-  font-size:13px;font-weight:600;transition:all .15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:inherit}
-.nav-btn:hover{background:rgba(255,255,255,.09);color:#fff}
-.nav-btn.active{background:var(--ombre);color:#fff}
-.nav-btn .n-icon{width:18px;font-size:15px;flex-shrink:0}
-.nav-btn .n-cnt{margin-left:auto;font-size:10px;background:rgba(255,255,255,.18);padding:1px 6px;border-radius:100px}
-.sidebar-foot{padding:12px 10px;border-top:1px solid rgba(255,255,255,.08)}
-.sidebar-foot .date-text{font-size:11px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:8px}
-
-/* whiteboard center (teacher reference) */
-#wb-area{flex:1;height:100vh;padding-top:54px;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.wb-inner{flex:1;background:#fff;margin:14px;border-radius:var(--r-xl);box-shadow:var(--sh-lg);display:flex;flex-direction:column;overflow:hidden}
-.wb-sec{display:none;flex:1;flex-direction:column;padding:30px 40px;overflow-y:auto}
-.wb-sec.active{display:flex}
-.wb-sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--pink);margin-bottom:22px;display:flex;align-items:center;gap:8px}
-.ref-note{font-size:11px;color:var(--g400);font-weight:600;margin-left:auto;text-transform:none;letter-spacing:0}
-
-/* FLASHCARD */
-.fc-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px}
-.fc{perspective:1400px;width:min(560px,90%);height:300px;cursor:pointer}
-.fc-inner{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
-.fc.flipped .fc-inner{transform:rotateY(180deg)}
-.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  border-radius:24px;padding:28px;text-align:center;border:2px solid var(--pink-l)}
-.fc-front{background:linear-gradient(135deg,#fff 0%,var(--pink-ll) 100%)}
-.fc-back{background:linear-gradient(135deg,var(--pink-ll) 0%,var(--fuchsia-l) 100%);transform:rotateY(180deg)}
-.fc-flip-hint{position:absolute;bottom:12px;right:16px;font-size:10px;color:var(--pink-m);font-weight:700;letter-spacing:.5px}
-.fc-word{font-size:54px;font-weight:900;color:var(--pink-dd);line-height:1.05}
-.fc-phon{font-size:24px;color:var(--fuchsia);font-style:italic;margin-top:6px;font-weight:600}
-.fc-pos{margin-top:10px}
-.fc-mean{font-size:30px;font-weight:700;color:var(--g800);margin-top:6px}
-.fc-ex{font-size:17px;color:var(--g500);font-style:italic;margin-top:14px;max-width:90%}
-.fc-empty{font-size:16px;color:var(--g400);font-weight:600}
-.fc-ctrl{display:flex;align-items:center;gap:16px;margin-top:26px;justify-content:center}
-.fc-ctrl .prog-txt{font-size:14px;color:var(--g400);font-weight:700;min-width:54px;text-align:center}
-
-/* questions */
-.q-display-item{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:var(--r-lg);margin-bottom:10px;border:2px solid transparent;cursor:pointer;transition:all .15s}
-.q-display-item:hover{background:var(--pink-ll)}
-.q-display-item.lit{background:var(--pink-l);border-color:var(--pink-m)}
-.q-num-bubble{width:30px;height:30px;background:var(--g100);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--g600);flex-shrink:0}
-.q-display-item.lit .q-num-bubble{background:var(--pink);color:#fff}
-.q-text-big{font-size:20px;color:var(--g800);font-weight:500;padding-top:2px;line-height:1.4;flex:1}
-.send-btn{opacity:0;font-size:11px;flex-shrink:0;transition:opacity .15s}
-.q-display-item:hover .send-btn{opacity:1}
-
-/* patterns */
-.pt-item{background:var(--g50);border:1px solid var(--g200);border-radius:var(--r-xl);padding:20px 24px;margin-bottom:14px;position:relative}
-.pt-template{font-size:25px;font-weight:800;color:var(--pink-dd);margin-bottom:10px}
-.pt-template mark{background:var(--pink-l);color:var(--pink);padding:1px 6px;border-radius:4px}
-.pt-examples{font-size:15px;color:var(--g500);font-style:italic}
-.pt-examples p{margin-bottom:3px}
-.pt-examples p::before{content:"→ ";color:var(--pink);font-weight:700;font-style:normal}
-
-/* grammar */
-.grammar-text{font-size:18px;line-height:1.9;color:var(--g700);white-space:pre-wrap;flex:1}
-
-/* ═══════════ STUDENT BOARD PANEL (right, teacher control) ═══════════ */
-#board-panel{width:340px;flex-shrink:0;height:100vh;padding-top:54px;display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
-#board-panel.collapsed{width:0;overflow:hidden;border:none}
-.bp-inner{flex:1;display:flex;flex-direction:column;padding:14px;gap:12px;overflow:hidden}
-.bp-head{display:flex;align-items:center;gap:8px}
-.bp-head h3{font-size:13px;font-weight:800;color:#fff;flex:1}
-.bp-sub{font-size:11px;color:rgba(255,255,255,.5);line-height:1.4}
-.bp-preview{background:#fff;border-radius:var(--r-lg);padding:14px 16px;min-height:90px;max-height:200px;overflow-y:auto;font-size:15px;color:var(--g700);white-space:pre-wrap;border:2px solid var(--pink-m);line-height:1.5}
-.bp-preview.empty{color:var(--g300);font-style:italic;display:flex;align-items:center}
-.bp-input{flex:1;width:100%;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.95);border-radius:var(--r-lg);padding:12px;font-size:14px;color:var(--g800);resize:none;outline:none;font-family:inherit;line-height:1.5}
-.bp-input:focus{border-color:var(--pink-m)}
-.bp-actions{display:flex;gap:8px}
-.board-toggle{position:absolute;top:62px;right:14px;z-index:90}
-
-/* ═══════════ SUMMARY ═══════════ */
-#view-summary{background:var(--ombre-soft);overflow-y:auto;align-items:center;padding:36px 20px}
-.sum-wrap{width:100%;max-width:680px;margin:0 auto}
-.sum-hero{background:var(--ombre);border-radius:var(--r-xl);padding:28px;text-align:center;color:#fff;margin-bottom:20px;box-shadow:var(--sh-lg)}
-.sum-hero h2{font-size:24px;font-weight:900;margin-bottom:6px}
-.sum-hero p{opacity:.85}
-.sum-card{background:#fff;border:1px solid var(--pink-l);border-radius:var(--r-xl);padding:24px;margin-bottom:14px}
-.score-big{font-size:76px;font-weight:900;line-height:1;text-align:center}
-input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;background:var(--pink-l);outline:none;margin:14px 0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--pink);cursor:pointer;box-shadow:0 2px 8px rgba(219,39,119,.5)}
-.recall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:12px}
-.recall-chip{padding:8px 12px;border:1.5px solid var(--g200);border-radius:var(--r);cursor:pointer;font-size:13px;transition:all .15s;font-weight:600;display:flex;align-items:center;gap:6px}
-.recall-chip:hover{border-color:var(--pink-m)}
-.recall-chip.ok{background:var(--pink-l);border-color:var(--pink);color:var(--pink-d)}
-.recall-chip .ck{display:none;font-weight:800}
-.recall-chip.ok .ck{display:inline}
-.sum-actions{display:flex;gap:12px}
-
-/* ═══════════ HISTORY ═══════════ */
-#view-history{background:var(--g50)}
-.hist-body{max-width:920px;margin:0 auto;padding:24px;overflow-y:auto;flex:1}
-
-/* EMPTY */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center}
-.empty-icon{font-size:48px;margin-bottom:14px}
-.empty h3{font-size:17px;font-weight:700;color:var(--g700);margin-bottom:6px}
-.empty p{font-size:13px;color:var(--g400)}
-
-/* NOTIF */
-#notif-root{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.notif{background:var(--pink-dd);color:#fff;padding:11px 18px;border-radius:var(--r-lg);font-size:13px;box-shadow:var(--sh-lg);animation:slideIn .2s ease;max-width:320px}
-.notif.ok{background:var(--green)}
-.notif.err{background:var(--red)}
-@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--pink-m);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--pink)}
-.fade{animation:fadeUp .2s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.spin{display:inline-block;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div id="notif-root"></div>
 
-<!-- ═══════════ DASHBOARD ═══════════ -->
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
 <div id="view-dashboard" class="view active">
   <div class="dash-wrap">
-    <div class="dash-hero">
-      <div class="app-icon">🌸</div>
-      <h1>English Teaching Board</h1>
-      <p>Soạn giáo án · Flashcard · Trình chiếu Google Meet · Theo dõi tiến độ</p>
-      <div class="live-clock js-clock">—</div>
+
+    <!-- Profile strip -->
+    <div class="dash-profile">
+      <div class="dash-avatar" id="teacher-initials">QA</div>
+      <div class="field">
+        <div class="label">Giáo viên</div>
+        <button class="val" onclick="App.editTeacher()">
+          <span id="teacher-name">Quỳnh Anh</span>
+          <span class="icon" data-icon="pencil" data-size="11"></span>
+        </button>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <div class="label">Học viên</div>
+        <span class="chip accent" style="padding:3px 10px;font-size:12px;font-weight:600">
+          <span class="icon" data-icon="headphones" data-size="11"></span>
+          Học viên
+        </span>
+      </div>
+      <span class="clock" id="dash-clock">—</span>
     </div>
+
+    <!-- Hero -->
+    <div class="dash-hero">
+      <div>
+        <div class="kicker">
+          <span class="icon" data-icon="book" data-size="11"></span>
+          English Teaching Board
+        </div>
+        <h1 id="hero-greeting">Chào cô <em>Quỳnh Anh</em>, <em>sẵn sàng cho buổi học chưa?</em></h1>
+        <div class="sub">Theo dõi tiến độ · soạn giáo án · flashcard · trình chiếu Google Meet</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-outline" onclick="App.showView('history')">
+          <span class="icon" data-icon="history" data-size="14"></span>
+          Lịch sử
+        </button>
+        <button class="btn btn-primary btn-lg" onclick="App.newSession()">
+          <span class="icon" data-icon="plus" data-size="14"></span>
+          Soạn buổi học mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-val" id="st-days">0</div><div class="stat-lbl">Ngày học</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-sess">0</div><div class="stat-lbl">Buổi học</div></div>
+      <div class="stat-card"><div class="stat-val" id="st-sess">0</div><div class="stat-lbl">Buổi đã học</div></div>
       <div class="stat-card"><div class="stat-val" id="st-vocab">0</div><div class="stat-lbl">Từ vựng đã học</div></div>
+      <div class="stat-card"><div class="stat-val" id="st-avg">–</div><div class="stat-lbl">Điểm trung bình</div></div>
     </div>
-    <div class="dash-actions">
-      <button class="btn btn-primary btn-lg" onclick="App.newSession()">✚ Soạn buổi học mới</button>
-      <button class="btn btn-outline btn-lg" onclick="App.showView('history')">📋 Lịch sử buổi học</button>
+
+    <!-- Recent -->
+    <div class="section-title">
+      Buổi học gần đây
+      <span class="count" id="recent-count"></span>
     </div>
-    <div class="section-title">Buổi học gần đây</div>
-    <div id="recent-list"></div>
+    <div class="session-list" id="recent-list"></div>
+
+    <!-- Signature -->
+    <div class="signature">
+      Made with <span class="heart">♥</span> — Anh
+    </div>
   </div>
 </div>
 
-<!-- ═══════════ SETUP ═══════════ -->
+<!-- ═══════════════ SETUP ═══════════════ -->
 <div id="view-setup" class="view">
   <div class="page-header">
-    <button class="btn btn-ghost btn-icon" onclick="App.showView('dashboard')" title="Quay lại">←</button>
-    <h2>✏️ Soạn buổi học</h2>
-    <button class="btn btn-primary" onclick="App.startTeach()">▶ Bắt đầu dạy</button>
+    <button class="btn btn-ghost btn-icon" onclick="App.showView('dashboard')" title="Quay lại">
+      <span class="icon" data-icon="arrowL" data-size="14"></span>
+    </button>
+    <h2>Soạn buổi học mới</h2>
+    <span class="chip accent" style="font-size:12px">
+      <span class="icon" data-icon="headphones" data-size="11"></span>
+      với học viên
+    </span>
+    <div class="right">
+      <button class="btn btn-primary" onclick="App.startTeach()">
+        <span class="icon" data-icon="play" data-size="13"></span>
+        Bắt đầu dạy
+      </button>
+    </div>
   </div>
+
   <div class="setup-body">
-    <!-- topic row -->
-    <div class="setup-top-row">
-      <div class="form-group" style="margin:0">
-        <label class="label">📌 Chủ đề buổi học *</label>
-        <input id="inp-topic" class="input input-lg" placeholder="Ví dụ: Travel, Shopping, Job Interview..." oninput="App.onTopicChange()" />
-      </div>
-      <div class="form-group" style="margin:0">
-        <label class="label">Trình độ</label>
-        <select id="inp-level" class="input"><option>B1+</option><option>B2</option><option>B1</option><option>A2</option></select>
-      </div>
-      <div class="form-group" style="margin:0">
-        <label class="label">Số từ</label>
-        <input id="inp-vcount" class="input" type="number" value="8" min="1" max="20" />
-      </div>
-      <div class="form-group" style="margin:0">
-        <label class="label">Số câu hỏi</label>
-        <input id="inp-qcount" class="input" type="number" value="5" min="1" max="12" />
-      </div>
-      <div class="form-group" style="margin:0">
-        <label class="label" style="visibility:hidden">.</label>
-        <button id="gen-btn" class="btn btn-primary" onclick="App.autoGenerate()" title="Tự tạo từ vựng (kèm tra từ điển) + câu hỏi + ngữ pháp theo chủ đề & số lượng">💡 Gợi ý nội dung</button>
+
+    <!-- Topic row -->
+    <div class="setup-top-card">
+      <div class="setup-top-row">
+        <div>
+          <label class="label">Chủ đề buổi học</label>
+          <input id="inp-topic" class="input input-lg" placeholder="Ví dụ: Travel, Shopping, Job Interview..." oninput="App.onTopicChange()" />
+        </div>
+        <div>
+          <label class="label">Trình độ</label>
+          <select id="inp-level" class="input">
+            <option>B1+</option><option>B2</option><option>B1</option><option>A2</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Số từ</label>
+          <input id="inp-vcount" class="input mono" type="number" value="8" min="1" max="20" />
+        </div>
+        <div>
+          <label class="label">Số câu</label>
+          <input id="inp-qcount" class="input mono" type="number" value="5" min="1" max="12" />
+        </div>
+        <button id="gen-btn" class="btn btn-secondary" onclick="App.autoGenerate()" title="Tự tạo từ vựng (kèm tra từ điển) + câu hỏi + ngữ pháp">
+          <span class="icon" data-icon="wand" data-size="14"></span>
+          Gợi ý AI
+        </button>
       </div>
     </div>
 
-    <!-- swapped: LEFT questions, RIGHT vocab -->
-    <div class="two-col">
-      <!-- QUESTIONS (now left) -->
-      <div class="section-card">
-        <div class="section-card-header">
-          <h3>❓ Câu hỏi thảo luận</h3>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-outline btn-sm" onclick="App.genQuestions()" title="Tự tạo câu hỏi theo chủ đề + trình độ, kèm gợi ý ngữ pháp">✨ Tự tạo</button>
-            <button class="btn btn-ghost btn-sm" onclick="App.addQRow()">+ Thêm</button>
+    <!-- 3-col grid -->
+    <div class="setup-grid">
+
+      <!-- VOCAB -->
+      <div class="card">
+        <div class="card-head">
+          <span class="ico" data-icon="card" data-size="14"></span>
+          <h3>Từ vựng</h3>
+          <span id="vocab-badge" class="chip accent" style="font-size:11px;padding:1px 7px">8</span>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick="App.addVocabRow()">
+              <span class="icon" data-icon="plus" data-size="12"></span>
+              Thêm
+            </button>
           </div>
         </div>
-        <div class="section-card-body"><div id="q-rows"></div></div>
+        <div class="card-body" id="vocab-rows"></div>
+        <div class="fc-config">
+          <div class="label">🎴 Cấu hình flashcard</div>
+          <div class="cfg-row" id="cfg-front"></div>
+          <div class="cfg-row" id="cfg-back"></div>
+        </div>
       </div>
 
-      <!-- VOCAB (now right) -->
-      <div class="section-card">
-        <div class="section-card-header">
-          <h3>📖 Từ vựng <span id="vocab-badge" class="badge badge-pink">8</span></h3>
-          <button class="btn btn-ghost btn-sm" onclick="App.addVocabRow()">+ Thêm</button>
-        </div>
-        <div class="section-card-body">
-          <!-- flashcard config -->
-          <div class="fc-config">
-            <div class="cfg-label">🎴 Mặt TRƯỚC của flashcard</div>
-            <div class="cfg-row" id="cfg-front"></div>
-            <div class="cfg-label">🎴 Mặt SAU của flashcard</div>
-            <div class="cfg-row" id="cfg-back"></div>
+      <!-- QUESTIONS + PATTERNS -->
+      <div class="col" style="gap:14px">
+        <div class="card">
+          <div class="card-head">
+            <span class="ico" data-icon="question" data-size="14"></span>
+            <h3>Câu hỏi thảo luận</h3>
+            <div class="actions">
+              <button class="btn btn-ghost btn-sm" onclick="App.genQuestions()" title="Tự tạo theo trình độ">
+                <span class="icon" data-icon="sparkle" data-size="12"></span>
+                Tự tạo
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="App.addQRow()">
+                <span class="icon" data-icon="plus" data-size="12"></span>
+                Thêm
+              </button>
+            </div>
           </div>
-          <div id="vocab-rows"></div>
+          <div class="card-body" id="q-rows"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="ico" data-icon="chat" data-size="14"></span>
+            <h3>Mẫu câu giao tiếp</h3>
+            <div class="actions">
+              <button class="btn btn-ghost btn-sm" onclick="App.addPatternRow()">
+                <span class="icon" data-icon="plus" data-size="12"></span>
+                Thêm
+              </button>
+            </div>
+          </div>
+          <div class="card-body" id="pattern-rows"></div>
         </div>
       </div>
-    </div>
 
-    <!-- PATTERNS -->
-    <div class="section-card">
-      <div class="section-card-header">
-        <h3>💬 Mẫu câu giao tiếp</h3>
-        <button class="btn btn-ghost btn-sm" onclick="App.addPatternRow()">+ Thêm</button>
-      </div>
-      <div class="section-card-body" id="pattern-rows"></div>
-    </div>
-
-    <!-- GRAMMAR -->
-    <div class="section-card">
-      <div class="section-card-header"><h3>📝 Ghi chú ngữ pháp</h3>
-        <button class="btn btn-outline btn-sm" onclick="App.autoFillGrammar(false)" title="Tự điền các điểm ngữ pháp liên quan đến chủ đề">✨ Tự điền</button>
-      </div>
-      <div class="section-card-body">
-        <div class="gram-suggest-box">
-          <div class="gs-title">💡 Gợi ý ngữ pháp cho chủ đề <span id="gram-topic-name" class="text-muted" style="font-weight:600"></span> (click để thêm)</div>
+      <!-- GRAMMAR -->
+      <div class="card">
+        <div class="card-head">
+          <span class="ico" data-icon="note" data-size="14"></span>
+          <h3>Ngữ pháp</h3>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick="App.autoFillGrammar(false)">
+              <span class="icon" data-icon="sparkle" data-size="12"></span>
+              Tự điền
+            </button>
+          </div>
+        </div>
+        <div class="card-body gram-suggest">
+          <div class="label">Gợi ý cho chủ đề <span id="gram-topic-name" class="muted">(chung)</span></div>
           <div class="gram-chips" id="gram-chips"></div>
+          <label class="label">Ghi chú</label>
+          <textarea id="inp-grammar" class="input" rows="6" placeholder="Điểm ngữ pháp trọng tâm... (click gợi ý phía trên hoặc tự gõ)"></textarea>
         </div>
-        <textarea id="inp-grammar" class="input" rows="4" placeholder="Điểm ngữ pháp trọng tâm... (click gợi ý phía trên hoặc tự gõ)"></textarea>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ TEACH ═══════════ -->
+<!-- ═══════════════ TEACH ═══════════════ -->
 <div id="view-teach" class="view">
+
   <div id="teach-bar">
-    <span class="t-logo">🌸 ETB</span>
-    <div class="t-topic"><h2 id="t-topic">Topic</h2><span id="t-level">B1+</span></div>
-    <div class="t-meta">
-      <span class="day-pill" id="t-day">Ngày 1</span>
+    <div class="t-brand">
+      <div class="mark"><span class="icon" data-icon="book" data-size="14"></span></div>
+      <div class="name">ETB</div>
+    </div>
+    <div class="t-topic">
+      <h2 id="t-topic">Topic</h2>
+      <div class="meta" id="t-level">B1+ · Buổi 1</div>
+    </div>
+    <div class="t-right">
+      <span class="t-day" id="t-day">Ngày 1</span>
       <button class="timer-btn" id="timer-btn" onclick="App.toggleTimer()" title="Click để tạm dừng / tiếp tục">30:00</button>
-      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.55)" onclick="App.endSession()">⏹ Kết thúc</button>
+      <button class="t-end" onclick="App.endSession()">
+        <span class="icon" data-icon="stop" data-size="12"></span>
+        Kết thúc
+      </button>
     </div>
   </div>
 
   <div id="teach-sidebar">
     <div class="sidebar-nav">
       <div class="nav-label">Nội dung (chỉ GV thấy)</div>
-      <button class="nav-btn active" data-sec="vocab"     onclick="App.setSec('vocab')">    <span class="n-icon">🎴</span>Flashcard <span class="n-cnt" id="nc-vocab">0</span></button>
-      <button class="nav-btn"        data-sec="questions" onclick="App.setSec('questions')"><span class="n-icon">❓</span>Câu hỏi   <span class="n-cnt" id="nc-q">0</span></button>
-      <button class="nav-btn"        data-sec="patterns"  onclick="App.setSec('patterns')"> <span class="n-icon">💬</span>Mẫu câu   <span class="n-cnt" id="nc-p">0</span></button>
-      <button class="nav-btn"        data-sec="grammar"   onclick="App.setSec('grammar')">  <span class="n-icon">📝</span>Ngữ pháp</button>
+
+      <button class="nav-btn active" data-sec="vocab" onclick="App.setSec('vocab')">
+        <span class="n-icon" data-icon="card" data-size="16"></span>
+        <span class="n-label">Flashcard</span>
+        <span class="n-cnt" id="nc-vocab">0</span>
+        <span class="n-hint">1</span>
+      </button>
+      <button class="nav-btn" data-sec="questions" onclick="App.setSec('questions')">
+        <span class="n-icon" data-icon="question" data-size="16"></span>
+        <span class="n-label">Câu hỏi</span>
+        <span class="n-cnt" id="nc-q">0</span>
+        <span class="n-hint">2</span>
+      </button>
+      <button class="nav-btn" data-sec="patterns" onclick="App.setSec('patterns')">
+        <span class="n-icon" data-icon="chat" data-size="16"></span>
+        <span class="n-label">Mẫu câu</span>
+        <span class="n-cnt" id="nc-p">0</span>
+        <span class="n-hint">3</span>
+      </button>
+      <button class="nav-btn" data-sec="grammar" onclick="App.setSec('grammar')">
+        <span class="n-icon" data-icon="note" data-size="16"></span>
+        <span class="n-label">Ngữ pháp</span>
+        <span class="n-cnt" style="visibility:hidden">0</span>
+        <span class="n-hint">4</span>
+      </button>
     </div>
-    <div class="sidebar-foot">
-      <div class="date-text js-clock" id="t-date">—</div>
-      <button class="btn btn-primary w-full" style="margin-bottom:8px" onclick="App.openStudent()">🖥️ Mở màn hình HV</button>
-      <button class="btn btn-danger w-full" onclick="App.endSession()">⏹ Kết thúc buổi học</button>
+
+    <div class="sidebar-cta">
+      <div class="h"><span class="icon" data-icon="monitor" data-size="12"></span> Bảng học viên</div>
+      <div class="p">Mở cửa sổ phụ, share qua Google Meet để học viên nhìn thấy.</div>
+      <button class="btn btn-primary btn-sm btn-block" onclick="App.openStudent()">
+        <span class="icon" data-icon="monitor" data-size="12"></span>
+        Mở màn hình HV
+      </button>
     </div>
   </div>
 
   <div id="wb-area">
     <div class="wb-inner">
+
       <!-- FLASHCARD -->
       <div id="wb-vocab" class="wb-sec active">
-        <div class="wb-sec-title">🎴 Flashcard từ vựng <span class="ref-note">Click thẻ để lật · ←/→ đổi thẻ</span></div>
+        <div class="wb-sec-title">
+          <span class="icon" data-icon="card" data-size="13"></span>
+          Flashcard từ vựng
+          <span class="hint">Click thẻ để lật · ←/→ đổi thẻ · Space để lật</span>
+        </div>
         <div class="fc-stage" id="fc-stage"></div>
-        <div class="fc-ctrl" id="fc-ctrl">
-          <button class="btn btn-secondary" onclick="App.prevCard()">← Trước</button>
-          <button class="btn btn-outline" onclick="App.flipCard()">🔄 Lật thẻ</button>
-          <span class="prog-txt" id="fc-prog">1 / 8</span>
-          <button class="btn btn-primary" onclick="App.nextCard()">Tiếp →</button>
+        <div class="fc-ctrl">
+          <button class="btn btn-outline" onclick="App.prevCard()">
+            <span class="icon" data-icon="arrowL" data-size="14"></span>
+            Trước
+          </button>
+          <button class="btn btn-secondary" onclick="App.flipCard()">
+            <span class="icon" data-icon="refresh" data-size="14"></span>
+            Lật thẻ
+          </button>
+          <span class="prog" id="fc-prog">1 / 8</span>
+          <button class="btn btn-primary" onclick="App.nextCard()">
+            Tiếp
+            <span class="icon" data-icon="arrowR" data-size="14"></span>
+          </button>
         </div>
       </div>
+
       <!-- QUESTIONS -->
       <div id="wb-questions" class="wb-sec">
-        <div class="wb-sec-title">❓ Câu hỏi thảo luận <span class="ref-note">Hover để đẩy lên bảng HV</span></div>
+        <div class="wb-sec-title">
+          <span class="icon" data-icon="question" data-size="13"></span>
+          Câu hỏi thảo luận
+          <span class="hint">Hover để đẩy lên bảng HV</span>
+        </div>
         <div id="q-display"></div>
       </div>
+
       <!-- PATTERNS -->
       <div id="wb-patterns" class="wb-sec">
-        <div class="wb-sec-title">💬 Mẫu câu giao tiếp</div>
+        <div class="wb-sec-title">
+          <span class="icon" data-icon="chat" data-size="13"></span>
+          Mẫu câu giao tiếp
+        </div>
         <div id="pt-display"></div>
       </div>
+
       <!-- GRAMMAR -->
       <div id="wb-grammar" class="wb-sec">
-        <div class="wb-sec-title">📝 Điểm ngữ pháp</div>
+        <div class="wb-sec-title">
+          <span class="icon" data-icon="note" data-size="13"></span>
+          Ngữ pháp trọng tâm
+        </div>
         <div class="grammar-text" id="grammar-txt"></div>
       </div>
     </div>
   </div>
 
-  <!-- STUDENT BOARD PANEL -->
-  <button class="btn btn-outline btn-sm board-toggle" onclick="App.toggleBoardPanel()" id="board-toggle-btn">🖥️ Bảng HV</button>
+  <button class="btn btn-outline btn-sm board-toggle" onclick="App.toggleBoardPanel()">
+    <span class="icon" data-icon="monitor" data-size="13"></span>
+    Bảng HV
+  </button>
+
   <div id="board-panel">
     <div class="bp-inner">
       <div class="bp-head">
-        <h3>🖥️ Bảng học viên</h3>
-        <span style="width:9px;height:9px;border-radius:50%;background:#4ade80;display:inline-block" title="đồng bộ"></span>
+        <span class="icon" data-icon="monitor" data-size="14" style="color:var(--accent)"></span>
+        <h3>Bảng học viên</h3>
+        <span class="live"><span class="dot"></span>LIVE</span>
       </div>
-      <div class="bp-sub">Nội dung gõ ở đây hiện realtime trên màn hình học viên. Học viên KHÔNG thấy giáo án.</div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.5px">Học viên đang thấy:</div>
+      <div class="bp-sub">Học viên thấy realtime nội dung dưới đây, KHÔNG thấy giáo án.</div>
+      <label class="label">Học viên đang thấy</label>
       <div class="bp-preview empty" id="bp-preview">(trống)</div>
       <textarea class="bp-input" id="bp-input" placeholder="Gõ nội dung giảng bài cho học viên ở đây..." oninput="App.onBoardInput()"></textarea>
       <div class="bp-actions">
-        <button class="btn btn-outline btn-sm flex-1" onclick="App.clearBoard()">🧹 Xóa bảng</button>
-        <button class="btn btn-primary btn-sm flex-1" onclick="App.openStudent()">🖥️ Mở cửa sổ HV</button>
+        <button class="btn btn-outline btn-sm flex-1" onclick="App.clearBoard()">
+          <span class="icon" data-icon="trash" data-size="12"></span>
+          Xóa bảng
+        </button>
+        <button class="btn btn-primary btn-sm flex-1" onclick="App.openStudent()">
+          <span class="icon" data-icon="monitor" data-size="12"></span>
+          Mở cửa sổ HV
+        </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ SUMMARY ═══════════ -->
+<!-- ═══════════════ SUMMARY ═══════════════ -->
 <div id="view-summary" class="view">
   <div class="sum-wrap">
-    <div class="sum-hero"><div style="font-size:40px;margin-bottom:8px">🎉</div><h2>Kết thúc buổi học!</h2><p id="sum-meta"></p></div>
-    <div class="sum-card" style="text-align:center">
-      <div style="font-size:13px;color:var(--g500);margin-bottom:10px">Điểm học viên buổi hôm nay</div>
-      <div class="score-big" id="score-big" style="color:var(--pink)">75</div>
-      <div style="font-size:18px;color:var(--g300);margin-bottom:2px">/100</div>
-      <input type="range" id="score-range" min="0" max="100" value="75" oninput="App.updateScore(this.value)"/>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g400)"><span>Cần cải thiện</span><span>Rất tốt 🌟</span></div>
+    <div class="sum-hero">
+      <div class="kicker">Tổng kết buổi học</div>
+      <h2 id="sum-hero-topic">Topic</h2>
+      <div class="sub" id="sum-meta"></div>
     </div>
+
+    <div class="sum-card score-block">
+      <div class="kicker">Điểm hôm nay</div>
+      <div class="score-big" id="score-big">75</div>
+      <div class="of">/ 100</div>
+      <input type="range" id="score-range" class="score-range" min="0" max="100" value="75" oninput="App.updateScore(this.value)" />
+      <div class="range-labels"><span>Cần cải thiện</span><span>Rất tốt</span></div>
+    </div>
+
     <div class="sum-card">
-      <div style="font-weight:800;margin-bottom:3px;color:var(--pink-dd)">📖 Từ vựng nhớ được</div>
-      <div style="font-size:12px;color:var(--g500);margin-bottom:10px">Chọn các từ học viên nhớ được hôm nay</div>
+      <h4>
+        <span class="icon" data-icon="book" data-size="14" style="color:var(--accent)"></span>
+        Từ vựng nhớ được
+      </h4>
+      <p class="muted" style="font-size:12px;margin-bottom:10px">Click để chọn các từ học viên nhớ được hôm nay</p>
       <div class="recall-grid" id="recall-grid"></div>
     </div>
+
     <div class="sum-card">
-      <label class="label" style="margin-bottom:8px">📝 Nhận xét buổi học</label>
-      <textarea class="input" id="sum-notes" rows="4" placeholder="Tiến bộ? Lỗi ngữ pháp/từ vựng cần ôn? Kế hoạch buổi sau..."></textarea>
+      <h4>
+        <span class="icon" data-icon="note" data-size="14" style="color:var(--accent)"></span>
+        Nhận xét buổi học
+      </h4>
+      <textarea id="sum-notes" class="input" rows="4" placeholder="Tiến bộ? Lỗi cần ôn? Kế hoạch buổi sau..."></textarea>
     </div>
+
     <div class="sum-actions">
-      <button class="btn btn-secondary" onclick="App.showView('dashboard')">← Về trang chính</button>
-      <button class="btn btn-success flex-1 btn-lg" onclick="App.saveSession()">💾 Lưu buổi học</button>
+      <button class="btn btn-outline" onclick="App.showView('dashboard')">
+        <span class="icon" data-icon="arrowL" data-size="14"></span>
+        Về trang chính
+      </button>
+      <button class="btn btn-primary flex-1 btn-lg" onclick="App.saveSession()">
+        <span class="icon" data-icon="check" data-size="14"></span>
+        Lưu buổi học
+      </button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ HISTORY ═══════════ -->
+<!-- ═══════════════ HISTORY ═══════════════ -->
 <div id="view-history" class="view">
   <div class="page-header">
-    <button class="btn btn-ghost btn-icon" onclick="App.showView('dashboard')">←</button>
-    <h2>📋 Lịch sử buổi học</h2>
-    <button class="btn btn-danger btn-sm" onclick="App.clearAll()">🗑 Xóa tất cả</button>
+    <button class="btn btn-ghost btn-icon" onclick="App.showView('dashboard')">
+      <span class="icon" data-icon="arrowL" data-size="14"></span>
+    </button>
+    <h2>Lịch sử buổi học</h2>
+    <div class="right">
+      <button class="btn btn-danger btn-sm" onclick="App.clearAll()">
+        <span class="icon" data-icon="trash" data-size="13"></span>
+        Xóa tất cả
+      </button>
+    </div>
   </div>
   <div class="hist-body" id="hist-body"></div>
 </div>
 
-<script>
-/* ════════ DATABASE ════════ */
-const DB = {
-  KEY:'etb_v3',
-  load(){try{return JSON.parse(localStorage.getItem(this.KEY))||{sessions:[]}}catch{return{sessions:[]}}},
-  save(d){localStorage.setItem(this.KEY,JSON.stringify(d))},
-  all(){return this.load().sessions},
-  put(s){const d=this.load();const i=d.sessions.findIndex(x=>x.id===s.id);if(i>=0)d.sessions[i]=s;else d.sessions.unshift(s);this.save(d)},
-  del(id){const d=this.load();d.sessions=d.sessions.filter(s=>s.id!==id);this.save(d)},
-  clear(){this.save({sessions:[]})},
-  stats(){const s=this.all().filter(x=>x.done);return{days:new Set(s.map(x=>x.date)).size,sess:s.length,vocab:s.reduce((n,x)=>n+(x.vocab?.length||0),0)}}
-};
+<!-- TEACHER MODAL -->
+<div id="teacher-modal" class="modal-overlay">
+  <div class="modal">
+    <h3>Tên giáo viên</h3>
+    <p>Tên sẽ hiển thị trên dashboard và khi học viên xem màn hình share.</p>
+    <input id="teacher-input" class="input input-lg" placeholder="Quỳnh Anh" />
+    <div class="row-actions">
+      <button class="btn btn-ghost" onclick="App.closeTeacherModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="App.saveTeacher()">Lưu</button>
+    </div>
+  </div>
+</div>
 
-/* ════════ FLASHCARD CONFIG ════════ */
-const FC_FIELDS = [
-  {k:'w',  label:'Từ vựng'},
-  {k:'ph', label:'Phiên âm'},
-  {k:'pos',label:'Từ loại'},
-  {k:'m',  label:'Nghĩa'},
-  {k:'e',  label:'Ví dụ'}
-];
-let fcConfig = { front:['w','ph'], back:['m','pos','e'] };
-function loadFcConfig(){ try{const c=JSON.parse(localStorage.getItem('etb_fc'));if(c)fcConfig=c}catch{} }
-function saveFcConfig(){ localStorage.setItem('etb_fc',JSON.stringify(fcConfig)); }
-
-/* ════════ POS map ════════ */
-const POS_VI = {noun:'danh từ',verb:'động từ',adjective:'tính từ',adverb:'trạng từ',pronoun:'đại từ',
-  preposition:'giới từ',conjunction:'liên từ',interjection:'thán từ',exclamation:'thán từ',
-  determiner:'từ hạn định',numeral:'số từ',article:'mạo từ'};
-const POS_LIST = ['danh từ','động từ','tính từ','trạng từ','giới từ','liên từ','đại từ','mạo từ','cụm từ','khác'];
-
-/* ════════ TOPIC vocab bank ════════ */
-const VOCAB_BANK = {
-  travel:['journey','destination','luggage','itinerary','accommodation','sightseeing','departure','souvenir','passport','delay'],
-  shopping:['bargain','discount','receipt','refund','brand','afford','expensive','customer','cashier','warranty'],
-  food:['delicious','recipe','ingredient','flavour','vegetarian','cuisine','appetizer','dessert','spicy','reservation'],
-  work:['colleague','deadline','salary','promotion','interview','schedule','meeting','responsibility','overtime','resume'],
-  health:['exercise','symptom','prescription','nutrition','recover','injury','appointment','wellbeing','diet','stress'],
-  technology:['device','application','software','update','download','password','wireless','data','screen','feature'],
-  family:['relative','sibling','generation','household','upbringing','relationship','support','gathering','tradition','bond'],
-  environment:['pollution','recycle','climate','sustainable','wildlife','renewable','waste','conservation','emission','habitat'],
-  education:['knowledge','assignment','curriculum','degree','lecture','scholarship','research','semester','tutor','revise'],
-  hobby:['leisure','passion','collection','amateur','enthusiast','relaxing','creative','outdoor','skill','routine']
-};
-const TOPIC_ALIASES = {travel:['travel','holiday','trip','tourism','vacation'],shopping:['shop','shopping','market','money','buy'],
-  food:['food','restaurant','cooking','eat','meal','cuisine'],work:['work','job','career','office','business','interview'],
-  health:['health','fitness','sport','body','medical','exercise'],technology:['tech','technology','internet','computer','phone','device','ai'],
-  family:['family','friend','relationship','people','home'],environment:['environment','nature','climate','green','pollution'],
-  education:['education','school','study','learning','university','student'],hobby:['hobby','hobbies','leisure','free time','interest','music','art']};
-
-/* ════════ GRAMMAR suggestions by topic ════════ */
-const GRAMMAR_BY_TOPIC = {
-  travel:['Past Simple — kể chuyến đi đã qua','Present Perfect — "Have you ever been to...?"','be going to — kế hoạch du lịch','Prepositions of place (at/in/on)'],
-  shopping:['Comparatives & Superlatives — cheaper / the best','"I would like to..." / "I\'ll take it"','Countable & Uncountable + much/many','Question with "How much...?"'],
-  food:['Countable & Uncountable nouns','"Would you like...?" / "Can I have...?"','Imperatives — công thức nấu ăn','some / any / a lot of'],
-  work:['Present Perfect — kinh nghiệm làm việc','used to — công việc trước đây','Modal verbs — should / have to / must','Future plans — will / be going to'],
-  health:['should / shouldn\'t — lời khuyên','Present Simple — thói quen sinh hoạt','Adverbs of frequency','First Conditional — "If you exercise..."'],
-  technology:['Passive voice — "It is made by..."','Present Perfect — công nghệ mới','First Conditional','Relative clauses (which/that)'],
-  family:['Present Simple — mô tả người thân','used to — hồi nhỏ','Comparatives — so sánh thành viên','Possessive (\'s)'],
-  environment:['Passive voice','First & Second Conditional','should / must — trách nhiệm','Quantifiers — too much / too many'],
-  education:['Present Perfect Continuous','Reported speech','Modal verbs — can / could / be able to','Gerunds & Infinitives'],
-  hobby:['Present Simple + adverbs of frequency','like / love / enjoy + V-ing','"How often do you...?"','Comparatives']
-};
-const GRAMMAR_DEFAULT = ['Present Simple vs Present Continuous','Past Simple','Present Perfect','Comparatives & Superlatives','Modal verbs (can/should/must)','First Conditional','Future: will vs be going to'];
-
-/* ════════ QUESTION templates by level ({t} = chủ đề) ════════ */
-const QUESTION_TEMPLATES = {
-  'A2':[
-    'Do you like {t}? Why or why not?',
-    'What is your favourite thing about {t}?',
-    'How often do you do something with {t}?',
-    'Can you describe {t} in a few words?',
-    'Who do you usually talk about {t} with?',
-    'When was the last time you thought about {t}?',
-    'Is {t} popular in your country?',
-    'What words do you know about {t}?',
-    'Do you want to learn more about {t}? Why?',
-    'How do you feel about {t}?',
-    'What is easy or difficult about {t}?',
-    'Can you give an example of {t}?'
-  ],
-  'B1':[
-    'Have you ever had a good or bad experience with {t}?',
-    'Why is {t} important to you?',
-    'What do you usually do when you think about {t}?',
-    'Can you describe a typical situation involving {t}?',
-    'What would you recommend to a friend about {t}?',
-    'How has {t} affected your life recently?',
-    'What do most people in your country think about {t}?',
-    'What are the good and bad sides of {t}?',
-    'If you had more time, how would you explore {t}?',
-    'What did you learn about {t} when you were younger?',
-    'How do you usually deal with problems related to {t}?',
-    'What would you like to change about {t}?'
-  ],
-  'B1+':[
-    'What are the biggest challenges related to {t}?',
-    'How has {t} changed in the last few years?',
-    'Do you think {t} is more important today than in the past? Why?',
-    'What advice would you give about {t} from your own experience?',
-    'How is {t} different in your country compared to other countries?',
-    'What role does {t} play in modern life?',
-    'Do you think technology has changed {t}? How?',
-    'What are some common misunderstandings about {t}?',
-    'How would you explain {t} to someone who knows nothing about it?',
-    'What factors make {t} successful or unsuccessful?',
-    'Should the government do more about {t}? Why?',
-    'How do you balance the pros and cons of {t}?'
-  ],
-  'B2':[
-    'To what extent does {t} affect our daily lives?',
-    'What are the main advantages and disadvantages of {t}?',
-    'How do you think {t} will develop in the future?',
-    'Some people think {t} is overrated — what is your opinion?',
-    'If you could change one thing about {t}, what would it be and why?',
-    'How does {t} influence society as a whole?',
-    'What ethical issues are connected to {t}?',
-    'To what degree should {t} be regulated?',
-    'How might different generations view {t} differently?',
-    'What would the world look like without {t}?',
-    'How do cultural differences shape attitudes towards {t}?',
-    'What is the relationship between {t} and personal happiness?'
-  ]
-};
-
-/* ════════ STATE ════════ */
-const S = { cur:null, view:'dashboard', wb:{sec:'vocab',ci:0,flipped:false}, timer:{secs:1800,elapsed:0,running:false,iv:null} };
-
-/* ════════ PRESENT (sync to student window) ════════ */
-const Present = {
-  ch: ('BroadcastChannel' in window) ? new BroadcastChannel('etb-present') : null,
-  state:{topic:'',board:''},
-  init(){ if(this.ch) this.ch.onmessage = e => { if(e.data && e.data.type==='hello') this.push(); }; },
-  push(){ const data=JSON.stringify(this.state); localStorage.setItem('etb_present',data); if(this.ch) this.ch.postMessage(this.state); },
-  setTopic(v){ this.state.topic=v; this.push(); },
-  setBoard(v){ this.state.board=v; this.push(); }
-};
-
-/* ════════ HELPERS ════════ */
-const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const today=()=>new Date().toLocaleDateString('vi-VN');
-const fmtDur=s=>{if(!s)return'0 phút';const m=Math.floor(s/60),ss=s%60;return ss?`${m}p ${ss}s`:`${m} phút`};
-const hlBlanks=s=>s.replace(/\.\.\./g,'<mark>...</mark>');
-function toast(msg,type=''){const el=document.createElement('div');el.className='notif '+type;el.innerHTML=msg;document.getElementById('notif-root').appendChild(el);setTimeout(()=>el.remove(),3200);}
-function matchTopicKey(topic){const t=(topic||'').toLowerCase();for(const key in TOPIC_ALIASES){if(TOPIC_ALIASES[key].some(a=>t.includes(a)))return key;}return null;}
-
-/* ════════ APP ════════ */
-const App = {
-  showView(name){
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    document.getElementById('view-'+name).classList.add('active');
-    S.view=name;
-    if(name==='dashboard')this.renderDash();
-    if(name==='history')this.renderHist();
-  },
-
-  /* ── DASHBOARD ── */
-  renderDash(){
-    const st=DB.stats();
-    document.getElementById('st-days').textContent=st.days;
-    document.getElementById('st-sess').textContent=st.sess;
-    document.getElementById('st-vocab').textContent=st.vocab;
-    const sessions=DB.all().slice(0,6),el=document.getElementById('recent-list');
-    if(!sessions.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🌷</div><h3>Chưa có buổi học nào</h3><p>Nhấn "Soạn buổi học mới" để bắt đầu!</p></div>`;return;}
-    el.innerHTML=sessions.map(s=>`
-      <div class="session-row">
-        <div class="sess-day">${s.dayNum||'?'}</div>
-        <div class="sess-info"><div class="sess-topic">${esc(s.topic)}</div>
-          <div class="sess-meta">${s.date} · ${s.level} · ${s.vocab?.length||0} từ · ${fmtDur(s.elapsed)}${s.notes?`<br><em style="color:var(--g400)">${esc(s.notes.substring(0,80))}${s.notes.length>80?'...':''}</em>`:''}</div></div>
-        ${s.score!=null?`<div class="sess-score">${s.score}<span style="font-size:13px;color:var(--g400)">/100</span></div>`:`<div style="font-size:12px;color:var(--g300)">–</div>`}
-        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="App.delSess('${s.id}')">🗑</button>
-      </div>`).join('');
-  },
-
-  /* ── NEW SESSION ── */
-  newSession(){
-    S.cur={id:Date.now(),date:today(),dayNum:DB.all().filter(x=>x.done).length+1,topic:'',level:'B1+',
-      vocab:[],qs:[],patterns:[],grammar:'',elapsed:0,score:null,notes:'',done:false,remembered:[]};
-    this.showView('setup');
-    this.initSetup();
-  },
-
-  /* ── SETUP ── */
-  initSetup(){
-    document.getElementById('inp-topic').value='';
-    document.getElementById('inp-level').value='B1+';
-    document.getElementById('inp-vcount').value='8';
-    document.getElementById('inp-qcount').value='5';
-    document.getElementById('inp-grammar').value='';
-    this.renderFcConfig();
-    this.buildVocabRows(8,[]);
-    this.buildQRows(['Have you ever ...? Tell me about it.','What do you usually do when ...?','How do you feel about ...?']);
-    this.buildPatternRows([
-      {p:'I would like to ...',ex:['I would like to try that.','I would like to know more.']},
-      {p:'Could you ... please?',ex:['Could you repeat that please?','Could you speak slowly please?']}
-    ]);
-    this.renderGrammarChips('');
-    document.getElementById('inp-topic').focus();
-  },
-
-  onTopicChange(){ this.renderGrammarChips(document.getElementById('inp-topic').value); },
-
-  renderFcConfig(){
-    const mk=(side)=>FC_FIELDS.map(f=>`<button class="chip ${fcConfig[side].includes(f.k)?'on':''}" onclick="App.toggleFcField('${side}','${f.k}')">${f.label}</button>`).join('');
-    document.getElementById('cfg-front').innerHTML=mk('front');
-    document.getElementById('cfg-back').innerHTML=mk('back');
-  },
-  toggleFcField(side,k){
-    const arr=fcConfig[side],i=arr.indexOf(k);
-    if(i>=0)arr.splice(i,1);else arr.push(k);
-    if(!arr.length)arr.push(k); // never empty
-    saveFcConfig();this.renderFcConfig();
-  },
-
-  buildVocabRows(n,existing){
-    const c=document.getElementById('vocab-rows');let h='';
-    for(let i=0;i<n;i++){const v=existing[i]||{w:'',ph:'',pos:'',m:'',e:''};h+=this.vcardHTML(v);}
-    c.innerHTML=h;this.updVBadge();
-  },
-  vcardHTML(v){
-    const posOpts=['<option value="">— từ loại —</option>'].concat(POS_LIST.map(p=>`<option ${v.pos===p?'selected':''}>${p}</option>`)).join('');
-    return `<div class="vcard">
-      <div class="vcard-top">
-        <input class="input v-w" placeholder="word" value="${esc(v.w)}" />
-        <input class="input v-ph" placeholder="/phiên âm/" value="${esc(v.ph)}" />
-      </div>
-      <select class="input v-pos">${posOpts}</select>
-      <div style="height:6px"></div>
-      <input class="input v-m" placeholder="nghĩa / definition" value="${esc(v.m)}" />
-      <div style="height:6px"></div>
-      <input class="input v-e" placeholder="câu ví dụ" value="${esc(v.e)}" />
-      <div class="vcard-actions">
-        <button class="btn btn-outline btn-sm flex-1" onclick="App.lookupRow(this)">🌐 Tra từ này</button>
-        <button class="btn btn-ghost btn-sm" onclick="this.closest('.vcard').remove();App.updVBadge()">✕</button>
-      </div>
-    </div>`;
-  },
-  updVBadge(){document.getElementById('vocab-badge').textContent=document.querySelectorAll('#vocab-rows .vcard').length;},
-  addVocabRow(){const c=document.getElementById('vocab-rows');const d=document.createElement('div');d.innerHTML=this.vcardHTML({w:'',ph:'',pos:'',m:'',e:''});const card=d.firstElementChild;c.appendChild(card);card.querySelector('.v-w').focus();this.updVBadge();},
-
-  buildQRows(qs){const c=document.getElementById('q-rows');c.innerHTML='';qs.forEach(q=>this._appendQRow(q));},
-  _appendQRow(val=''){const c=document.getElementById('q-rows');const n=c.querySelectorAll('.q-row').length+1;const d=document.createElement('div');d.className='q-row';
-    d.innerHTML=`<span class="q-num">${n}.</span><input class="input q-txt" value="${esc(val)}" placeholder="Câu hỏi thảo luận..." style="flex:1"/><button class="btn btn-ghost btn-icon" onclick="this.closest('.q-row').remove()">✕</button>`;c.appendChild(d);},
-  addQRow(){this._appendQRow();const a=document.querySelectorAll('#q-rows .q-txt');a[a.length-1]?.focus();},
-
-  genQuestions(){
-    const topic=document.getElementById('inp-topic').value.trim();
-    if(!topic){toast('Nhập chủ đề trước đã!','err');return;}
-    const level=document.getElementById('inp-level').value;
-    const qcount=parseInt(document.getElementById('inp-qcount').value)||5;
-    const n=this.buildQuestionsFor(topic,level,qcount);
-    this.autoFillGrammar(true);
-    toast(`✨ Đã tạo ${n} câu hỏi cho trình độ <b>${level}</b> + gợi ý ngữ pháp.`,'ok');
-  },
-
-  autoFillGrammar(silent){
-    const key=matchTopicKey(document.getElementById('inp-topic').value);
-    const list=key?GRAMMAR_BY_TOPIC[key]:GRAMMAR_DEFAULT;
-    const ta=document.getElementById('inp-grammar');
-    let added=0;
-    list.forEach(g=>{if(!ta.value.includes(g)){ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+'• '+g;added++;}});
-    document.querySelectorAll('#gram-chips .chip').forEach(c=>c.classList.add('on'));
-    if(!silent)toast(added?`Đã thêm ${added} điểm ngữ pháp liên quan`:'Đã có đủ gợi ý ngữ pháp','ok');
-  },
-
-  buildPatternRows(pts){const c=document.getElementById('pattern-rows');c.innerHTML='';pts.forEach(pt=>this._appendPRow(pt.p,pt.ex?.join('\n')||''));},
-  _appendPRow(p='',ex=''){const c=document.getElementById('pattern-rows');const d=document.createElement('div');d.className='pattern-row';
-    d.innerHTML=`<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px"><div style="flex:1"><label class="label">Mẫu câu</label><input class="input p-pat" value="${esc(p)}" placeholder="e.g. I'd like to ..."/></div><button class="btn btn-ghost btn-icon" onclick="this.closest('.pattern-row').remove()">✕</button></div><label class="label">Ví dụ (mỗi dòng 1 câu)</label><textarea class="input p-ex" rows="2" placeholder="I'd like to order a coffee.">${esc(ex)}</textarea>`;c.appendChild(d);},
-  addPatternRow(){this._appendPRow();},
-
-  renderGrammarChips(topic){
-    const key=matchTopicKey(topic);
-    const list=key?GRAMMAR_BY_TOPIC[key]:GRAMMAR_DEFAULT;
-    document.getElementById('gram-topic-name').textContent=key?`(${key})`:'(chung)';
-    document.getElementById('gram-chips').innerHTML=list.map(g=>`<button class="chip chip-suggest" onclick="App.addGrammar(this,'${esc(g).replace(/'/g,"\\'")}')">+ ${esc(g)}</button>`).join('');
-  },
-  addGrammar(btn,text){
-    const ta=document.getElementById('inp-grammar');
-    const line='• '+text;
-    if(ta.value.includes(text)){toast('Đã có trong ghi chú');return;}
-    ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+line;
-    btn.classList.add('on');
-  },
-
-  /* ── auto-generate vocab + questions + grammar ── */
-  async autoGenerate(){
-    const topic=document.getElementById('inp-topic').value.trim();
-    if(!topic){toast('Nhập chủ đề trước đã!','err');return;}
-    const level=document.getElementById('inp-level').value;
-    const vcount=parseInt(document.getElementById('inp-vcount').value)||8;
-    const qcount=parseInt(document.getElementById('inp-qcount').value)||5;
-    const btn=document.getElementById('gen-btn');const old=btn.innerHTML;btn.disabled=true;
-    // 1) vocab from topic bank + dictionary
-    const key=matchTopicKey(topic);
-    let vmsg='';
-    if(key&&VOCAB_BANK[key]){
-      const words=VOCAB_BANK[key].slice(0,vcount);
-      this.buildVocabRows(vcount,words.map(w=>({w,ph:'',pos:'',m:'',e:''})));
-      const ok=await this.autoFillDict(btn);
-      vmsg=`${words.length} từ (tra từ điển ${ok}/${words.length})`;
-    }else{
-      vmsg='chủ đề chưa có từ vựng sẵn — bạn tự nhập từ';
-    }
-    // 2) questions by level + count
-    const qn=this.buildQuestionsFor(topic,level,qcount);
-    // 3) related grammar
-    this.autoFillGrammar(true);
-    btn.innerHTML=old;btn.disabled=false;
-    toast(`💡 Đã tạo: ${vmsg} · ${qn} câu hỏi (${level}) · gợi ý ngữ pháp.<br>Phần "nghĩa" là tiếng Anh — sửa sang tiếng Việt nếu muốn.`,'ok');
-  },
-
-  buildQuestionsFor(topic,level,count){
-    const tpl=QUESTION_TEMPLATES[level]||QUESTION_TEMPLATES['B1+'];
-    const t=topic.toLowerCase();
-    const list=tpl.slice(0,Math.max(1,count)).map(q=>q.replace(/\{t\}/g,t));
-    this.buildQRows(list);
-    return list.length;
-  },
-
-  /* ── dictionary lookup (Free Dictionary API) ── */
-  async fetchWord(word){
-    const res=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.trim().toLowerCase())}`);
-    if(!res.ok)throw new Error('notfound');
-    const data=await res.json();const en=data[0];
-    let ph=en.phonetic||'';
-    if(!ph&&en.phonetics)ph=(en.phonetics.find(p=>p.text)||{}).text||'';
-    const mn=en.meanings&&en.meanings[0];
-    const posEn=mn?mn.partOfSpeech:'';
-    const pos=POS_VI[posEn]||posEn||'';
-    let def='',ex='';
-    if(mn&&mn.definitions){def=mn.definitions[0].definition||'';ex=(mn.definitions.find(d=>d.example)||{}).example||'';}
-    return {ph,pos,m:def,e:ex};
-  },
-  async lookupRow(btn){
-    const card=btn.closest('.vcard');const w=card.querySelector('.v-w').value.trim();
-    if(!w){toast('Nhập từ trước!','err');return;}
-    const old=btn.innerHTML;btn.innerHTML='<span class="spin">⏳</span> Đang tra...';btn.disabled=true;
-    try{
-      const r=await this.fetchWord(w);
-      if(r.ph&&!card.querySelector('.v-ph').value)card.querySelector('.v-ph').value=r.ph;
-      if(r.pos)card.querySelector('.v-pos').value=POS_LIST.includes(r.pos)?r.pos:'khác';
-      if(r.m&&!card.querySelector('.v-m').value)card.querySelector('.v-m').value=r.m;
-      if(r.e&&!card.querySelector('.v-e').value)card.querySelector('.v-e').value=r.e;
-      toast(`✓ "${w}" đã tra xong`,'ok');
-    }catch{toast(`✗ Không tìm thấy "${w}"`,'err');}
-    btn.innerHTML=old;btn.disabled=false;
-  },
-  async autoFillDict(btn){
-    const cards=[...document.querySelectorAll('#vocab-rows .vcard')].filter(c=>c.querySelector('.v-w').value.trim());
-    if(!cards.length)return 0;
-    let ok=0;
-    for(let i=0;i<cards.length;i++){
-      const card=cards[i],w=card.querySelector('.v-w').value.trim();
-      if(btn)btn.innerHTML=`<span class="spin">⏳</span> Tra ${i+1}/${cards.length}`;
-      try{
-        const r=await this.fetchWord(w);
-        if(r.ph&&!card.querySelector('.v-ph').value)card.querySelector('.v-ph').value=r.ph;
-        if(r.pos)card.querySelector('.v-pos').value=POS_LIST.includes(r.pos)?r.pos:'khác';
-        if(r.m&&!card.querySelector('.v-m').value)card.querySelector('.v-m').value=r.m;
-        if(r.e&&!card.querySelector('.v-e').value)card.querySelector('.v-e').value=r.e;
-        ok++;
-      }catch{}
-    }
-    return ok;
-  },
-
-  /* ── collect ── */
-  collectSetup(){
-    const topic=document.getElementById('inp-topic').value.trim();
-    if(!topic){toast('Vui lòng nhập chủ đề!','err');return null;}
-    const vocab=[];
-    document.querySelectorAll('#vocab-rows .vcard').forEach(c=>{
-      const w=c.querySelector('.v-w').value.trim();
-      if(w)vocab.push({w,ph:c.querySelector('.v-ph').value.trim(),pos:c.querySelector('.v-pos').value,m:c.querySelector('.v-m').value.trim(),e:c.querySelector('.v-e').value.trim()});
-    });
-    if(!vocab.length){toast('Cần ít nhất 1 từ vựng!','err');return null;}
-    const qs=[];document.querySelectorAll('#q-rows .q-txt').forEach(i=>{if(i.value.trim())qs.push(i.value.trim())});
-    const patterns=[];document.querySelectorAll('#pattern-rows .pattern-row').forEach(r=>{const p=r.querySelector('.p-pat').value.trim();if(p)patterns.push({p,ex:r.querySelector('.p-ex').value.trim().split('\n').filter(Boolean)})});
-    return {topic,level:document.getElementById('inp-level').value,vocab,qs,patterns,grammar:document.getElementById('inp-grammar').value.trim()};
-  },
-
-  /* ── START TEACH ── */
-  startTeach(){
-    const data=this.collectSetup();if(!data)return;
-    Object.assign(S.cur,data);
-    this.renderTeach();
-    this.showView('teach');
-    Present.setTopic(S.cur.topic);
-    Present.setBoard('');
-    document.getElementById('bp-input').value='';
-    this.onBoardInput();
-    this.startTimer();
-  },
-
-  renderTeach(){
-    const c=S.cur;
-    document.getElementById('t-topic').textContent=c.topic;
-    document.getElementById('t-level').textContent=c.level;
-    document.getElementById('t-day').textContent=`Ngày ${c.dayNum}`;
-    document.getElementById('nc-vocab').textContent=c.vocab.length;
-    document.getElementById('nc-q').textContent=c.qs.length;
-    document.getElementById('nc-p').textContent=c.patterns.length;
-    S.wb={sec:'vocab',ci:0,flipped:false};
-    this.renderCard();this.renderQs();this.renderPatterns();
-    document.getElementById('grammar-txt').textContent=c.grammar||'(Không có ghi chú ngữ pháp)';
-    this.setSec('vocab');
-  },
-
-  /* ── FLASHCARD render ── */
-  faceHTML(v,fields){
-    let h='';
-    fields.forEach(k=>{
-      if(k==='w'  && v.w )h+=`<div class="fc-word">${esc(v.w)}</div>`;
-      if(k==='ph' && v.ph)h+=`<div class="fc-phon">${esc(v.ph.startsWith('/')?v.ph:'/'+v.ph+'/')}</div>`;
-      if(k==='pos'&& v.pos)h+=`<div class="fc-pos"><span class="badge badge-fuchsia">${esc(v.pos)}</span></div>`;
-      if(k==='m'  && v.m )h+=`<div class="fc-mean">${esc(v.m)}</div>`;
-      if(k==='e'  && v.e )h+=`<div class="fc-ex">"${esc(v.e)}"</div>`;
-    });
-    return h||'<div class="fc-empty">(trống — chọn field ở phần soạn bài)</div>';
-  },
-  renderCard(){
-    const v=S.cur.vocab[S.wb.ci]||{};
-    const stage=document.getElementById('fc-stage');
-    stage.innerHTML=`<div class="fc ${S.wb.flipped?'flipped':''}" id="the-card" onclick="App.flipCard()">
-      <div class="fc-inner">
-        <div class="fc-face fc-front fade">${this.faceHTML(v,fcConfig.front)}<span class="fc-flip-hint">MẶT TRƯỚC · click để lật</span></div>
-        <div class="fc-face fc-back">${this.faceHTML(v,fcConfig.back)}<span class="fc-flip-hint">MẶT SAU</span></div>
-      </div></div>`;
-    document.getElementById('fc-prog').textContent=`${S.wb.ci+1} / ${S.cur.vocab.length}`;
-  },
-  flipCard(){S.wb.flipped=!S.wb.flipped;document.getElementById('the-card')?.classList.toggle('flipped',S.wb.flipped);},
-  prevCard(){if(S.wb.ci>0){S.wb.ci--;S.wb.flipped=false;this.renderCard();}},
-  nextCard(){if(S.wb.ci<S.cur.vocab.length-1){S.wb.ci++;S.wb.flipped=false;this.renderCard();}},
-
-  renderQs(){
-    const el=document.getElementById('q-display');
-    if(!S.cur.qs.length){el.innerHTML='<div class="empty"><div class="empty-icon">❓</div><p>Không có câu hỏi</p></div>';return;}
-    el.innerHTML=S.cur.qs.map((q,i)=>`<div class="q-display-item ${i===0?'lit':''}">
-      <div class="q-num-bubble">${i+1}</div>
-      <div class="q-text-big" onclick="this.closest('.q-display-item').classList.toggle('lit')">${esc(q)}</div>
-      <button class="btn btn-secondary send-btn" onclick="App.sendToBoard('${esc(q).replace(/'/g,"\\'")}')">→ Bảng HV</button>
-    </div>`).join('');
-  },
-  renderPatterns(){
-    const el=document.getElementById('pt-display');
-    if(!S.cur.patterns.length){el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><p>Không có mẫu câu</p></div>';return;}
-    el.innerHTML=S.cur.patterns.map(pt=>`<div class="pt-item"><div class="pt-template">${hlBlanks(esc(pt.p))}</div>${pt.ex?.length?`<div class="pt-examples">${pt.ex.map(e=>`<p>${esc(e)}</p>`).join('')}</div>`:''}</div>`).join('');
-  },
-  setSec(sec){
-    S.wb.sec=sec;
-    document.querySelectorAll('.nav-btn[data-sec]').forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
-    document.querySelectorAll('.wb-sec').forEach(s=>s.classList.remove('active'));
-    document.getElementById('wb-'+sec)?.classList.add('active');
-  },
-
-  /* ── STUDENT BOARD ── */
-  onBoardInput(){
-    const v=document.getElementById('bp-input').value;
-    const pv=document.getElementById('bp-preview');
-    pv.textContent=v.trim()?v:'(trống)';pv.classList.toggle('empty',!v.trim());
-    Present.setBoard(v);
-  },
-  sendToBoard(text){
-    const ta=document.getElementById('bp-input');
-    ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+text;
-    this.onBoardInput();
-    if(document.getElementById('board-panel').classList.contains('collapsed'))this.toggleBoardPanel();
-    toast('Đã đẩy lên bảng học viên','ok');
-  },
-  clearBoard(){document.getElementById('bp-input').value='';this.onBoardInput();},
-  toggleBoardPanel(){document.getElementById('board-panel').classList.toggle('collapsed');},
-  openStudent(){
-    Present.push();
-    const w=window.open('student.html','etb_student','width=1280,height=760');
-    if(!w)toast('Trình duyệt chặn popup. Hãy cho phép popup rồi thử lại.','err');
-    else toast('Đã mở màn hình HV. Trên Google Meet hãy "Present a window" → chọn cửa sổ này.','ok');
-  },
-
-  /* ── TIMER ── */
-  startTimer(){S.timer={secs:1800,elapsed:0,running:true,iv:null};this._tick();S.timer.iv=setInterval(()=>{if(!S.timer.running)return;S.timer.secs--;S.timer.elapsed++;this._tick();if(S.timer.secs===0)toast('⏰ Hết 30 phút!','ok');},1000);},
-  _tick(){const el=document.getElementById('timer-btn'),s=S.timer.secs,a=Math.abs(s);el.textContent=(s<0?'+':'')+String(Math.floor(a/60)).padStart(2,'0')+':'+String(a%60).padStart(2,'0');el.classList.remove('warn','over');if(s<0)el.classList.add('over');else if(s<300)el.classList.add('warn');},
-  toggleTimer(){S.timer.running=!S.timer.running;document.getElementById('timer-btn').style.opacity=S.timer.running?'1':'.45';},
-  stopTimer(){clearInterval(S.timer.iv);S.timer.running=false;S.cur.elapsed=S.timer.elapsed;},
-
-  /* ── END / SUMMARY ── */
-  endSession(){if(!confirm('Kết thúc buổi học và chuyển sang tổng kết?'))return;this.stopTimer();this.renderSummary();this.showView('summary');},
-  renderSummary(){
-    const c=S.cur;
-    document.getElementById('sum-meta').textContent=`Chủ đề: ${c.topic} · Ngày ${c.dayNum} · ${fmtDur(c.elapsed)}`;
-    document.getElementById('score-range').value='75';this.updateScore(75);
-    document.getElementById('sum-notes').value='';
-    document.getElementById('recall-grid').innerHTML=c.vocab.map(v=>`<div class="recall-chip" onclick="this.classList.toggle('ok')" data-w="${esc(v.w)}"><span class="ck">✓</span>${esc(v.w)}</div>`).join('');
-  },
-  updateScore(v){v=parseInt(v);const el=document.getElementById('score-big');el.textContent=v;el.style.color=v>=80?'var(--green)':v>=60?'var(--pink)':'var(--amber)';},
-  saveSession(){const c=S.cur;c.score=parseInt(document.getElementById('score-range').value);c.notes=document.getElementById('sum-notes').value.trim();c.remembered=[...document.querySelectorAll('.recall-chip.ok')].map(el=>el.dataset.w);c.done=true;DB.put(c);toast('✅ Đã lưu buổi học!','ok');setTimeout(()=>this.showView('dashboard'),800);},
-
-  /* ── HISTORY ── */
-  renderHist(){
-    const sessions=DB.all(),el=document.getElementById('hist-body');
-    if(!sessions.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><h3>Chưa có buổi học nào</h3></div>';return;}
-    el.innerHTML=sessions.map(s=>`<div class="session-row"><div class="sess-day">${s.dayNum||'?'}</div>
-      <div class="sess-info"><div class="sess-topic">${esc(s.topic)}</div>
-        <div class="sess-meta">${s.date} · ${s.level} · ${s.vocab?.length||0} từ · ${fmtDur(s.elapsed)}${s.remembered?.length?` · Nhớ ${s.remembered.length}/${s.vocab?.length||0} từ`:''}${s.notes?`<br><em>${esc(s.notes.substring(0,100))}</em>`:''}</div></div>
-      ${s.score!=null?`<div class="sess-score">${s.score}<span style="font-size:13px;color:var(--g400)">/100</span></div>`:''}
-      <button class="btn btn-ghost btn-sm" style="color:var(--red);flex-shrink:0" onclick="App.delSess('${s.id}')">🗑</button></div>`).join('');
-  },
-  delSess(id){if(!confirm('Xóa buổi học này?'))return;DB.del(id);this.renderDash();this.renderHist();toast('Đã xóa');},
-  clearAll(){if(!confirm('Xóa TẤT CẢ lịch sử? Không thể khôi phục!'))return;DB.clear();this.renderHist();this.renderDash();toast('Đã xóa tất cả');},
-
-  /* ── KEYBOARD ── */
-  handleKey(e){
-    if(S.view!=='teach')return;
-    if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;
-    if(S.wb.sec==='vocab'){
-      if(e.key==='ArrowRight'){e.preventDefault();this.nextCard();}
-      if(e.key==='ArrowLeft'){e.preventDefault();this.prevCard();}
-      if(e.key===' '||e.key==='Enter'){e.preventDefault();this.flipCard();}
-    }
-    if(e.key==='1')this.setSec('vocab');if(e.key==='2')this.setSec('questions');if(e.key==='3')this.setSec('patterns');if(e.key==='4')this.setSec('grammar');
-  }
-};
-
-function tickClock(){
-  const s=new Date().toLocaleString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  document.querySelectorAll('.js-clock').forEach(e=>e.textContent=s);
-}
-setInterval(tickClock,1000);tickClock();
-
-document.addEventListener('keydown',e=>App.handleKey(e));
-loadFcConfig();
-Present.init();
-App.renderDash();
-</script>
+<script src="app.js"></script>
 </body>
 </html>

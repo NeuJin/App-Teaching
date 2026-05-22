@@ -704,7 +704,7 @@ const App = {
   toggleBoardPanel() { document.getElementById('board-panel').classList.toggle('collapsed'); },
   openStudent() {
     Present.push();
-    const w = window.open('student v2.html', 'etb_student', 'width=1280,height=760');
+    const w = window.open('student.html', 'etb_student', 'width=1280,height=760');
     if (!w) toast('Trình duyệt chặn popup. Hãy cho phép popup rồi thử lại.', 'err');
     else toast('Đã mở màn hình HV. Trên Google Meet: "Present a window" → chọn cửa sổ này', 'ok');
   },
