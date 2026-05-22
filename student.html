@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bảng học viên</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --pink:#db2777; --pink-d:#9d174d; --pink-l:#fce7f3; --pink-m:#f9a8d4;
+  --rose:#f43f5e; --fuchsia:#c026d3;
+  --g700:#334155; --g800:#1e293b;
+}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:linear-gradient(135deg,#fdf2f8 0%,#fce7f3 45%,#fae8ff 100%);
+  color:var(--g800); display:flex; flex-direction:column; overflow:hidden;
+}
+header{
+  background:linear-gradient(135deg,var(--pink) 0%,var(--fuchsia) 100%);
+  color:#fff; padding:18px 32px; display:flex; align-items:center; gap:16px;
+  box-shadow:0 4px 20px rgba(219,39,119,.25); flex-shrink:0;
+}
+header .topic-label{font-size:13px;font-weight:600;opacity:.8;text-transform:uppercase;letter-spacing:1.5px}
+header h1{font-size:34px;font-weight:900;line-height:1.1}
+header .live{
+  margin-left:auto;display:flex;align-items:center;gap:7px;
+  font-size:12px;font-weight:700;background:rgba(255,255,255,.2);
+  padding:5px 12px;border-radius:100px;
+}
+header .dot{width:9px;height:9px;border-radius:50%;background:#4ade80;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+main{flex:1;display:flex;padding:28px;overflow:hidden}
+.board{
+  flex:1;background:#fff;border-radius:28px;
+  box-shadow:0 12px 40px rgba(219,39,119,.18);
+  border:3px solid var(--pink-m);
+  padding:48px 56px;overflow-y:auto;
+  font-size:30px;line-height:1.7;color:var(--g700);
+  white-space:pre-wrap;word-break:break-word;font-weight:500;
+}
+.board.empty{display:flex;align-items:center;justify-content:center;color:var(--pink-m);font-weight:600;text-align:center}
+.board::-webkit-scrollbar{width:10px}
+.board::-webkit-scrollbar-thumb{background:var(--pink-m);border-radius:6px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="topic-label">Chủ đề buổi học</div>
+    <h1 id="topic">Đang chờ kết nối...</h1>
+  </div>
+  <div class="live"><span class="dot"></span>LIVE</div>
+</header>
+<main>
+  <div class="board empty" id="board">Giáo viên sẽ chia sẻ nội dung tại đây ✏️</div>
+</main>
+
+<script>
+const topicEl = document.getElementById('topic');
+const boardEl = document.getElementById('board');
+
+function apply(s){
+  if(!s) return;
+  topicEl.textContent = s.topic ? s.topic : 'Buổi học tiếng Anh';
+  if(s.board && s.board.trim()){
+    boardEl.classList.remove('empty');
+    boardEl.textContent = s.board;
+  }else{
+    boardEl.classList.add('empty');
+    boardEl.textContent = 'Giáo viên sẽ chia sẻ nội dung tại đây ✏️';
+  }
+}
+
+// 1) BroadcastChannel (instant on https)
+let ch = null;
+if('BroadcastChannel' in window){
+  ch = new BroadcastChannel('etb-present');
+  ch.onmessage = e => apply(e.data);
+  ch.postMessage({type:'hello'}); // ask teacher for current state
+}
+
+// 2) storage event
+window.addEventListener('storage', e => {
+  if(e.key === 'etb_present' && e.newValue) apply(JSON.parse(e.newValue));
+});
+
+// 3) initial load + poll fallback (works on file:// too)
+let last = '';
+function poll(){
+  const raw = localStorage.getItem('etb_present');
+  if(raw && raw !== last){ last = raw; try{ apply(JSON.parse(raw)); }catch{} }
+}
+poll();
+setInterval(poll, 600);
+</script>
+</body>
+</html>
