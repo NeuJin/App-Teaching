@@ -185,6 +185,51 @@ const QUESTION_TEMPLATES = {
   ],
 };
 
+/* ─── QUESTIONS gắn với từ vựng ({w} = một từ trong danh sách) ─── */
+const VOCAB_QUESTION_TEMPLATES = [
+  'Can you use the word "{w}" in a sentence about {t}?',
+  'What does "{w}" mean to you?',
+  'When was the last time you used the word "{w}"?',
+  'Do you think "{w}" is important when we talk about {t}? Why?',
+  'Can you give an example using "{w}"?',
+];
+
+/* ─── Datamuse part-of-speech tags → tiếng Việt ─── */
+const DM_POS = { n: 'danh từ', v: 'động từ', adj: 'tính từ', adv: 'trạng từ' };
+
+/* từ quá phổ biến — bỏ qua khi gợi ý từ vựng */
+const STOPWORDS = new Set(['the','a','an','and','or','but','of','to','in','on','at','for','with','is','are','was','were','be','been','being','this','that','these','those','it','its','as','by','from','have','has','had','do','does','did','will','would','can','could','should','about','very','more','most','some','any','all','one','two','thing','things']);
+
+function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ─── Datamuse: tìm từ vựng liên quan đến chủ đề (không cần API key) ─── */
+async function fetchTopicWords(topic, count) {
+  const t = topic.trim().toLowerCase();
+  const aliasKey = matchTopicKey(t);
+  const banned = new Set([t, ...t.split(/\s+/), ...(aliasKey ? TOPIC_ALIASES[aliasKey] : [])]);
+  const urls = [
+    `https://api.datamuse.com/words?ml=${encodeURIComponent(t)}&md=p&max=80`,
+    `https://api.datamuse.com/words?rel_trg=${encodeURIComponent(t)}&md=p&max=80`,
+  ];
+  const seen = new Map();
+  const results = await Promise.allSettled(urls.map(u => fetch(u).then(r => r.ok ? r.json() : [])));
+  results.forEach(r => {
+    if (r.status !== 'fulfilled') return;
+    r.value.forEach(item => {
+      const w = (item.word || '').toLowerCase().trim();
+      if (!w || w.length < 3 || /[^a-z\s'-]/.test(w) || banned.has(w) || STOPWORDS.has(w)) return;
+      const tags = item.tags || [];
+      const posTag = tags.find(tg => DM_POS[tg]);
+      const prev = seen.get(w);
+      const score = item.score || 0;
+      if (!prev || score > prev.score) seen.set(w, { w, score, pos: posTag ? DM_POS[posTag] : '' });
+    });
+  });
+  const single = w => w.includes(' ') ? 1 : 0; // ưu tiên từ đơn (tra từ điển tốt hơn)
+  const sorted = [...seen.values()].sort((a, b) => single(a.w) - single(b.w) || b.score - a.score);
+  return sorted.slice(0, count);
+}
+
 /* ─── STATE ─── */
 const S = {
   cur: null,
@@ -476,26 +521,58 @@ const App = {
     const qcount = parseInt(document.getElementById('inp-qcount').value) || 5;
     const btn = document.getElementById('gen-btn');
     const old = btn.innerHTML; btn.disabled = true;
-    const key = matchTopicKey(topic);
-    let vmsg = '';
-    if (key && VOCAB_BANK[key]) {
-      const words = VOCAB_BANK[key].slice(0, vcount);
-      this.buildVocabRows(vcount, words.map(w => ({ w, ph: '', pos: '', m: '', e: '' })));
-      const ok = await this.autoFillDict(btn);
-      vmsg = `${words.length} từ (tra ${ok}/${words.length})`;
-    } else {
-      vmsg = 'chủ đề chưa có từ vựng sẵn — bạn tự nhập từ';
-    }
+    const vmsg = (await this.populateVocab(topic, vcount, btn)).msg;
     const qn = this.buildQuestionsFor(topic, level, qcount);
     this.autoFillGrammar(true);
     btn.innerHTML = old; btn.disabled = false;
     toast(`Đã tạo: ${vmsg} · ${qn} câu hỏi (${esc(level)}) · gợi ý ngữ pháp`, 'ok');
   },
 
+  /* ── tìm + điền từ vựng (Datamuse + bộ sẵn + tra từ điển) ── */
+  async populateVocab(topic, vcount, btn) {
+    const key = matchTopicKey(topic);
+    const bankWords = (key && VOCAB_BANK[key]) ? VOCAB_BANK[key] : [];
+    let dmWords = [];
+    if (btn) btn.innerHTML = `<span class="spin">${ICONS.refresh(12)}</span> Đang tìm từ...`;
+    try { dmWords = await fetchTopicWords(topic, vcount + 12); } catch {}
+    const seen = new Set(); const merged = [];
+    const pushW = (w, pos) => { const k = w.toLowerCase(); if (!seen.has(k)) { seen.add(k); merged.push({ w, pos: pos || '' }); } };
+    dmWords.forEach(d => pushW(d.w, d.pos));
+    bankWords.forEach(w => pushW(w));
+    if (!merged.length) return { msg: 'không tìm được từ — bạn tự nhập', count: 0 };
+    const chosen = merged.slice(0, vcount);
+    this.buildVocabRows(chosen.length, chosen.map(c => ({ w: c.w, ph: '', pos: POS_LIST.includes(c.pos) ? c.pos : '', m: '', e: '' })));
+    const ok = await this.autoFillDict(btn);
+    const src = dmWords.length ? (bankWords.length ? 'Datamuse + bộ sẵn' : 'Datamuse') : 'bộ sẵn';
+    return { msg: `${chosen.length} từ · ${src} · tra ${ok}/${chosen.length}`, count: chosen.length };
+  },
+
+  async genVocab() {
+    const topic = document.getElementById('inp-topic').value.trim();
+    if (!topic) { toast('Nhập chủ đề trước đã!', 'err'); return; }
+    const vcount = parseInt(document.getElementById('inp-vcount').value) || 8;
+    const btn = document.getElementById('genv-btn');
+    const old = btn.innerHTML; btn.disabled = true;
+    const r = await this.populateVocab(topic, vcount, btn);
+    btn.innerHTML = old; btn.disabled = false;
+    toast(`Đã tạo từ vựng: ${r.msg}`, r.count ? 'ok' : 'err');
+  },
+
   buildQuestionsFor(topic, level, count) {
     const tpl = QUESTION_TEMPLATES[level] || QUESTION_TEMPLATES['B1+'];
     const t = topic.toLowerCase();
-    const list = tpl.slice(0, Math.max(1, count)).map(q => q.replace(/\{t\}/g, t));
+    const n = Math.max(1, count);
+    const words = [...document.querySelectorAll('#vocab-rows .v-w')].map(i => i.value.trim()).filter(Boolean);
+    const topicQs = shuffle(tpl).map(q => q.replace(/\{t\}/g, t));
+    let list;
+    if (words.length) {
+      const nVocab = Math.min(Math.ceil(n / 3), words.length);
+      const vocabQs = shuffle(words).slice(0, nVocab).map((w, i) =>
+        shuffle(VOCAB_QUESTION_TEMPLATES)[0].replace(/\{w\}/g, w).replace(/\{t\}/g, t));
+      list = shuffle([...topicQs.slice(0, n - nVocab), ...vocabQs]);
+    } else {
+      list = topicQs.slice(0, n);
+    }
     this.buildQRows(list);
     return list.length;
   },
