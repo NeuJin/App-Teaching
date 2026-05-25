@@ -185,6 +185,431 @@ const QUESTION_TEMPLATES = {
   ],
 };
 
+/* ─── QUESTIONS hand-crafted theo từng (chủ đề × trình độ) ─── */
+/* Mỗi nhóm 8 câu native-sounding, KHÔNG có placeholder {t} — soạn riêng cho chủ đề. */
+const TOPIC_QUESTIONS = {
+  travel: {
+    'A2': [
+      'Where would you like to go on holiday next?',
+      'What is the best place you have ever visited?',
+      'Do you prefer travelling by plane, train, or car? Why?',
+      'What do you usually pack in your luggage?',
+      'Have you ever been to another country?',
+      'Who do you like to travel with — family or friends?',
+      'What kind of trip do you enjoy: beach, city, or mountain?',
+      'What food do you try when you visit a new place?',
+    ],
+    'B1': [
+      'Tell me about a trip that did not go as planned. What happened?',
+      'How do you usually prepare for a holiday — plan everything or improvise?',
+      'What is the most beautiful place you have ever travelled to?',
+      'If you could spend a month anywhere in the world, where would you go?',
+      'Have you ever had a problem with luggage or accommodation while travelling?',
+      'What is something travelling has taught you that school did not?',
+      'Do you keep souvenirs or photos? Which means more to you?',
+      'What advice would you give a friend visiting your hometown for the first time?',
+    ],
+    'B1+': [
+      'How has the way people travel changed since smartphones became common?',
+      'Some say cheap flights have ruined travel. Do you agree?',
+      'What is the difference between being a tourist and being a traveller?',
+      'Tell me about a destination that completely surprised you — for better or worse.',
+      'How do you handle the gap between expectations and reality when travelling?',
+      'Is travelling a luxury or a basic part of modern life now?',
+      'What is one travel tradition or ritual you always follow?',
+      'How does travelling alone compare to travelling with someone you love?',
+    ],
+    'B2': [
+      'To what extent does mass tourism damage the places we love to visit?',
+      'Some argue you only truly understand a culture by living there, not visiting. What is your view?',
+      'Has Instagram changed why and how people travel? Is that good or bad?',
+      'Should certain places limit the number of tourists they accept each year? Why?',
+      'What is the relationship between travel and personal growth — is it overrated?',
+      'If teleportation existed and travel was instant, would something important be lost?',
+      'How do you weigh the carbon footprint of flying against the cultural value of travel?',
+      'Imagine no one could leave their country for a decade. How would the world change?',
+    ],
+  },
+  shopping: {
+    'A2': [
+      'What do you usually buy at the supermarket?',
+      'Do you like shopping for clothes? Why or why not?',
+      'How often do you go shopping?',
+      'Where do you shop most: online or in physical stores?',
+      'What was the last thing you bought?',
+      'Do you take a shopping list with you?',
+      'Is it easy to find a bargain in your city?',
+      'What do you do when something you bought is broken?',
+    ],
+    'B1': [
+      'Tell me about a great bargain you found recently.',
+      'Are you a planner or an impulse buyer when you shop?',
+      'Have you ever returned something? What was the reason?',
+      'How important is the brand name when you buy something?',
+      'What is the best place in your city for cheap shopping?',
+      'Do you prefer shopping alone or with someone? Why?',
+      'Have you ever bought something you regretted later?',
+      'How do you decide if a price is fair?',
+    ],
+    'B1+': [
+      'How has online shopping changed the way you spend money?',
+      'Some say physical stores will disappear in 20 years. Do you agree?',
+      'Is it better to buy cheap and replace often, or pay more for quality?',
+      'What do you think about Black Friday and the culture of constant sales?',
+      'How much do brands really influence your buying decisions — be honest?',
+      'Tell me about something you bought recently that was genuinely worth it.',
+      'Do you trust customer reviews when shopping online?',
+      'What is the difference between needing something and wanting it?',
+    ],
+    'B2': [
+      'How does targeted advertising shape the way people consume?',
+      'Is consumer culture a sign of progress, or a problem we should rethink?',
+      'To what extent are we responsible for the working conditions behind cheap products?',
+      'How might shopping habits look 50 years from now?',
+      'Some argue fast fashion is destroying both creativity and the planet. What is your take?',
+      'Should governments regulate how much advertising children are exposed to?',
+      'What is the psychological cost of having endless choice in supermarkets?',
+      'How do you balance enjoying nice things with living simply?',
+    ],
+  },
+  food: {
+    'A2': [
+      'What is your favourite food?',
+      'Do you cook at home or eat out more often?',
+      'What did you have for breakfast today?',
+      'Are you a vegetarian, or do you eat meat?',
+      'What food do you not like? Why?',
+      'Can you describe a typical meal in your family?',
+      'What is a popular food from your country?',
+      'Do you like spicy food?',
+    ],
+    'B1': [
+      'Tell me about the best meal you have ever had.',
+      'Have you ever tried a food from another culture and loved it?',
+      'Can you cook? What is your speciality?',
+      'What is the difference between a good restaurant and a great one?',
+      'Do you check the menu online before going to a restaurant?',
+      'Have you ever had a terrible meal in a restaurant?',
+      'What food reminds you of your childhood?',
+      'How important is food when you travel?',
+    ],
+    'B1+': [
+      'How have eating habits changed in your country in the last 20 years?',
+      'Is fast food really as bad as people say, or is the issue more nuanced?',
+      'Do food delivery apps make us lazier or just busier?',
+      'How does food connect people in your family or community?',
+      'What role does social media play in deciding where we eat?',
+      'Some chefs become celebrities. What does that say about modern culture?',
+      'Is being vegetarian a personal choice or a moral one?',
+      'How do you feel about cooking — is it relaxing therapy or a daily chore?',
+    ],
+    'B2': [
+      'To what extent should governments tax unhealthy food to reduce obesity?',
+      'How does food waste in rich countries compare with food shortages in poorer ones?',
+      'Should lab-grown meat replace traditional meat? What would be lost?',
+      'How has the rise of veganism changed cultural attitudes towards food?',
+      'Is the idea of "authentic" food meaningful, or just clever marketing?',
+      'What is the relationship between food, identity, and nationalism?',
+      'Should restaurants be required to display calorie counts and carbon footprints?',
+      'How do you weigh tradition against innovation when it comes to cooking?',
+    ],
+  },
+  work: {
+    'A2': [
+      'What is your job? Or what job would you like?',
+      'Do you prefer working in a team or alone?',
+      'What time do you usually start work?',
+      'What do you do on a typical day at work?',
+      'Is your job easy or difficult?',
+      'Do you have a long lunch break?',
+      'Who is your favourite colleague? Why?',
+      'What was your first job?',
+    ],
+    'B1': [
+      'Tell me about a project you are proud of.',
+      'Have you ever had a difficult boss? How did you handle it?',
+      'What skills do you use most at work?',
+      'Do you prefer a fixed schedule or flexible hours?',
+      'What was your hardest day at work recently?',
+      'If you could change one thing about your job, what would it be?',
+      'How do you switch off from work at the end of the day?',
+      'Have you ever helped a colleague who was struggling?',
+    ],
+    'B1+': [
+      'How has remote work changed your relationship with colleagues?',
+      'Is loyalty to one company still valuable, or should people change jobs often?',
+      'What is the most useful thing you have learned outside of formal education?',
+      'How do you handle stress and deadlines?',
+      'Some companies offer unlimited vacation. Does that actually work in practice?',
+      'What is the real difference between a manager and a leader?',
+      'Tell me about a time you disagreed with a decision at work.',
+      'Do you think your generation has it easier or harder than your parents at work?',
+    ],
+    'B2': [
+      'To what extent will AI replace traditional white-collar jobs?',
+      'Is the four-day week a realistic future, or just a privilege for some industries?',
+      'How should companies balance profit with employee wellbeing?',
+      'Has so-called "hustle culture" done more harm than good?',
+      'Should there be a legal cap on how much a CEO can earn compared with the lowest-paid worker?',
+      'How does meaningful work compare to well-paid work in importance?',
+      'What is the role of unions in the modern workplace?',
+      'How might the very concept of "a career" change for people born today?',
+    ],
+  },
+  health: {
+    'A2': [
+      'Do you exercise often? What do you do?',
+      'What time do you usually go to sleep?',
+      'Do you eat fruit and vegetables every day?',
+      'When was the last time you went to the doctor?',
+      'How do you feel when you do not sleep enough?',
+      'Do you drink enough water?',
+      'What sport do you like to watch or play?',
+      'What do you do to relax?',
+    ],
+    'B1': [
+      'Have you ever tried to start a new healthy habit? Did it last?',
+      'Tell me about the last time you were sick.',
+      'How do you take care of your mental health?',
+      'What is your opinion on diets — do any of them really work?',
+      'Do you trust health advice you read online?',
+      'Have you ever recovered from an injury? How did you feel?',
+      'Is it harder to stay healthy as you get older?',
+      'What advice would you give a friend who wants to get fit?',
+    ],
+    'B1+': [
+      'How has the pandemic changed people\'s attitudes towards health?',
+      'Is it possible to be truly healthy without giving anything up?',
+      'Some say sitting is the new smoking. What is your view?',
+      'How much should employers be responsible for employee wellbeing?',
+      'Tell me about a small change that made a big difference to your health.',
+      'Is healthcare in your country fair to everyone?',
+      'How do you balance work, sleep, and exercise?',
+      'What is the most ridiculous health trend you have seen recently?',
+    ],
+    'B2': [
+      'To what extent should governments fund preventative healthcare versus treatment?',
+      'How has social media affected young people\'s body image and mental health?',
+      'Should access to a gym and healthy food be considered a basic right?',
+      'How do you weigh personal freedom against public health — for example, smoking laws?',
+      'Is the wellness industry helping or exploiting people?',
+      'What is the relationship between purpose in life and physical health?',
+      'Should genetic testing for disease risk become routine? What are the ethical implications?',
+      'How might longer human lifespans change the way we structure our lives?',
+    ],
+  },
+  technology: {
+    'A2': [
+      'How many hours a day do you use your phone?',
+      'What is your favourite app and why?',
+      'Can you remember life before smartphones?',
+      'Do you like new technology, or do you prefer old things?',
+      'What was the first computer or phone you used?',
+      'Do you read messages or call people more often?',
+      'What do you do when your wifi stops working?',
+      'Are you good at remembering passwords?',
+    ],
+    'B1': [
+      'Tell me about a piece of technology you could not live without.',
+      'Have you ever had a problem because of technology — like losing files?',
+      'Are you an early adopter or do you wait for the second version?',
+      'What is the worst app on your phone — and why is it still there?',
+      'Do you use social media more for fun, work, or staying in touch?',
+      'Has technology made your life simpler or more complicated?',
+      'How do you decide if a new device is really worth the money?',
+      'What advice would you give an older relative learning to use a smartphone?',
+    ],
+    'B1+': [
+      'How has technology changed the way we form friendships?',
+      'Some say screens are stealing our attention. Do you agree?',
+      'What is one piece of technology you wish had never been invented? Why?',
+      'Has working from home been a blessing or a curse for productivity?',
+      'Are children growing up too quickly because of smartphones?',
+      'Tell me about a time technology unexpectedly improved your life.',
+      'Is real privacy still possible in 2026?',
+      'What is the difference between using technology and being controlled by it?',
+    ],
+    'B2': [
+      'To what extent should AI be allowed to make decisions about jobs, loans, or healthcare?',
+      'How might brain-computer interfaces change what it means to be human?',
+      'Is the digital divide widening or shrinking — and who is responsible?',
+      'Should social media companies be legally liable for the mental health of their users?',
+      'How do you weigh convenience against surveillance in modern life?',
+      'Is technology making us more empathetic, or less?',
+      'What ethical lines should never be crossed in technological progress?',
+      'Imagine a country with no internet for a year. What would be lost, and what gained?',
+    ],
+  },
+  family: {
+    'A2': [
+      'How many people are in your family?',
+      'Who do you live with?',
+      'Do you have brothers or sisters?',
+      'What does your family usually do at weekends?',
+      'Who in your family are you closest to? Why?',
+      'Do you have a big family meal every week?',
+      'What is your favourite family memory?',
+      'Are you more similar to your mother or your father?',
+    ],
+    'B1': [
+      'Tell me about a family tradition you really enjoy.',
+      'How often do you visit your relatives?',
+      'Has your family changed a lot in the last few years?',
+      'What is something you learned from your parents that you did not appreciate at the time?',
+      'How do you handle disagreements in your family?',
+      'Do you think modern families spend enough time together?',
+      'Who is the funniest person in your family? Tell me a story.',
+      'How do you stay close to family members who live far away?',
+    ],
+    'B1+': [
+      'How has the idea of "family" changed since your grandparents\' time?',
+      'Is it harder to raise children today than it was 30 years ago?',
+      'Some choose not to have children. Should that be a fully accepted personal choice?',
+      'What is the right balance between independence and staying close to family?',
+      'How do you handle being honest with family without hurting them?',
+      'Tell me about a moment when your family really came together.',
+      'Is birth order — being the eldest, middle, or youngest — actually important?',
+      'How much should grown children be responsible for their elderly parents?',
+    ],
+    'B2': [
+      'To what extent does family shape who we become, compared with environment and personal choice?',
+      'How do changing definitions of family — single parents, blended families, chosen families — affect society?',
+      'Should there be parenting courses for first-time parents?',
+      'Is the nuclear family still the most stable model, or are we overdue for new ones?',
+      'How do generational expectations differ in your culture between sons and daughters?',
+      'What role does family play in either passing on or breaking cycles of trauma?',
+      'How does growing up with social media compare with growing up without it, in terms of family bonds?',
+      'Should adult siblings be legally obligated to support each other in old age?',
+    ],
+  },
+  environment: {
+    'A2': [
+      'Do you recycle at home?',
+      'Is the air in your city clean or polluted?',
+      'What is your favourite season? Why?',
+      'Do you like animals? Do you have a pet?',
+      'What can you do to use less plastic?',
+      'Do you walk or take the bus instead of using a car sometimes?',
+      'Is your city green — does it have parks?',
+      'What animals live near your home?',
+    ],
+    'B1': [
+      'Have you noticed the weather changing in the last few years?',
+      'What do you do to be more environmentally friendly?',
+      'Tell me about a beautiful natural place near where you live.',
+      'Is it expensive to live a green lifestyle?',
+      'Have you ever joined a clean-up or environmental activity?',
+      'What do you think about electric cars?',
+      'Do you think recycling really helps, or is it just symbolic?',
+      'How can you reduce waste in your daily life?',
+    ],
+    'B1+': [
+      'How seriously do people in your country take climate change?',
+      'Is individual action like recycling really meaningful, or do we need bigger systemic change?',
+      'What is the biggest environmental problem in your region?',
+      'Some say technology alone will save us from climate change. Do you agree?',
+      'Tell me about a brand or company doing something genuinely green.',
+      'How do you feel when you see beautiful nature destroyed by development?',
+      'Should rich countries pay poorer ones to protect their rainforests?',
+      'Is eco-anxiety a real problem for your generation?',
+    ],
+    'B2': [
+      'To what extent should economic growth be sacrificed for environmental protection?',
+      'How can democracies make long-term climate decisions when politicians think in election cycles?',
+      'Should there be limits on how many children a person can have, for the planet?',
+      'Is geoengineering a sensible insurance policy or a dangerous gamble?',
+      'How do you weigh the loss of biodiversity against human development needs?',
+      'What is the role of art and storytelling in motivating environmental action?',
+      'Should the meat industry be regulated in the same way as the tobacco industry?',
+      'How might a future generation judge our environmental choices today?',
+    ],
+  },
+  education: {
+    'A2': [
+      'What was your favourite subject at school?',
+      'Did you enjoy school when you were younger?',
+      'Who was your best teacher? Why?',
+      'Do you study English every day?',
+      'What do you find difficult about learning a language?',
+      'Are exams a good way to test what you know?',
+      'Do you study better in the morning or in the evening?',
+      'What do you want to learn next?',
+    ],
+    'B1': [
+      'Tell me about a teacher who really influenced you.',
+      'Have you ever taught someone something? How did it feel?',
+      'What is the best way for you to remember new vocabulary?',
+      'Do you think school prepared you well for real life?',
+      'What is the most useful thing you have learned outside of school?',
+      'How important is it to keep learning as an adult?',
+      'Is online learning as effective as face-to-face?',
+      'If you could go back to school, what would you do differently?',
+    ],
+    'B1+': [
+      'How has education changed since you were a student?',
+      'Are exams a fair way to measure intelligence or potential?',
+      'Should creativity be taught as a school subject?',
+      'What is wrong — or right — with the education system in your country?',
+      'Is university still worth the cost in 2026?',
+      'How do you balance learning for pleasure with learning for a specific goal?',
+      'Tell me about a time you learned more from a mistake than from instruction.',
+      'Should children be allowed to choose what they study from an early age?',
+    ],
+    'B2': [
+      'To what extent should education be standardised across a country?',
+      'How might AI tutors change the role of human teachers in the next decade?',
+      'Is it ethical to use private tutors to give children an unfair advantage in exams?',
+      'Should universities prioritise critical thinking over career-ready skills?',
+      'How does the gap between rich and poor schools affect long-term social mobility?',
+      'What is lost when learning becomes purely transactional — about credentials, not curiosity?',
+      'Should history textbooks include the uncomfortable parts of a country\'s past?',
+      'How can lifelong learning realistically work in an economy that values youth?',
+    ],
+  },
+  hobby: {
+    'A2': [
+      'What do you like to do in your free time?',
+      'Do you play a musical instrument or sing?',
+      'What was your favourite hobby when you were a child?',
+      'Do you read books, watch films, or do both?',
+      'How often do you do your favourite hobby?',
+      'Do you collect anything?',
+      'Is your hobby cheap or expensive?',
+      'Have you tried a new hobby this year?',
+    ],
+    'B1': [
+      'Tell me about a hobby you have had for a long time.',
+      'What got you interested in your hobby in the first place?',
+      'Have you ever tried a hobby and decided it was not for you?',
+      'Do you prefer solo hobbies or group activities?',
+      'How do hobbies help you switch off from work or study?',
+      'Have you ever made good friends through a hobby?',
+      'Would you ever turn your hobby into a job? Why or why not?',
+      'What hobby would you love to try if you had unlimited time?',
+    ],
+    'B1+': [
+      'How has social media changed the way people share their hobbies?',
+      'Is it possible to be too obsessed with a hobby?',
+      'What is the difference between a hobby and a passion?',
+      'Some say modern life leaves no time for real hobbies. Do you agree?',
+      'How important is it to have a hobby with no goal of becoming good at it?',
+      'Tell me about a hobby that completely changed someone you know.',
+      'Why do you think people pay a lot to learn skills they will never use professionally?',
+      'How much do our hobbies shape our identity?',
+    ],
+    'B2': [
+      'To what extent are hobbies a luxury of people with time and money?',
+      'How has the gig economy turned hobbies into side hustles — and is that healthy?',
+      'Should schools place more value on creative hobbies than academic achievement?',
+      'Is collecting things a meaningful pursuit or a form of escapism?',
+      'How do hobbies contribute to mental health, beyond just relaxation?',
+      'Are "productive" hobbies inherently more valuable than "passive" ones?',
+      'What does our choice of hobby reveal about our personality?',
+      'How might VR and AI change the very nature of what counts as a hobby?',
+    ],
+  },
+};
+
 /* ─── QUESTIONS gắn với từ vựng ({w} = một từ trong danh sách) ─── */
 const VOCAB_QUESTION_TEMPLATES = [
   'Can you use the word "{w}" in a sentence about {t}?',
@@ -192,6 +617,9 @@ const VOCAB_QUESTION_TEMPLATES = [
   'When was the last time you used the word "{w}"?',
   'Do you think "{w}" is important when we talk about {t}? Why?',
   'Can you give an example using "{w}"?',
+  'Can you describe a moment when "{w}" was relevant in your life?',
+  'How would you teach a friend the meaning of "{w}"?',
+  'What is the difference between "{w}" and a similar word you know?',
 ];
 
 /* ─── Datamuse part-of-speech tags → tiếng Việt ─── */
@@ -294,7 +722,7 @@ const App = {
     // teacher name
     document.getElementById('teacher-name').textContent = Teacher.get();
     document.getElementById('teacher-initials').textContent = Teacher.initials();
-    document.getElementById('hero-greeting').innerHTML = `Chào cô <span style="font-style:italic">${esc(Teacher.get())}</span>, <em>sẵn sàng cho buổi học chưa?</em>`;
+    document.getElementById('hero-greeting').innerHTML = `Chào <span style="font-style:italic">${esc(Teacher.get())}</span>, <em>sẵn sàng cho buổi học chưa?</em>`;
     // clock
     const now = new Date();
     document.getElementById('dash-clock').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -559,16 +987,27 @@ const App = {
   },
 
   buildQuestionsFor(topic, level, count) {
-    const tpl = QUESTION_TEMPLATES[level] || QUESTION_TEMPLATES['B1+'];
     const t = topic.toLowerCase();
     const n = Math.max(1, count);
+    const key = matchTopicKey(t);
     const words = [...document.querySelectorAll('#vocab-rows .v-w')].map(i => i.value.trim()).filter(Boolean);
-    const topicQs = shuffle(tpl).map(q => q.replace(/\{t\}/g, t));
+
+    // 1) Câu hỏi chính: ưu tiên bộ hand-crafted nếu chủ đề khớp; fallback sang template chung
+    let topicQs;
+    if (key && TOPIC_QUESTIONS[key] && TOPIC_QUESTIONS[key][level]) {
+      topicQs = shuffle(TOPIC_QUESTIONS[key][level]);
+    } else {
+      const tpl = QUESTION_TEMPLATES[level] || QUESTION_TEMPLATES['B1+'];
+      topicQs = shuffle(tpl).map(q => q.replace(/\{t\}/g, t));
+    }
+
+    // 2) Trộn vài câu gắn với từ vựng (~20%, tối đa 3) nếu có vocab và n đủ lớn
     let list;
-    if (words.length) {
-      const nVocab = Math.min(Math.ceil(n / 3), words.length);
+    if (words.length && n >= 4) {
+      const nVocab = Math.min(Math.max(1, Math.round(n / 5)), words.length, 3);
+      const pool = shuffle(VOCAB_QUESTION_TEMPLATES);
       const vocabQs = shuffle(words).slice(0, nVocab).map((w, i) =>
-        shuffle(VOCAB_QUESTION_TEMPLATES)[0].replace(/\{w\}/g, w).replace(/\{t\}/g, t));
+        pool[i % pool.length].replace(/\{w\}/g, w).replace(/\{t\}/g, t));
       list = shuffle([...topicQs.slice(0, n - nVocab), ...vocabQs]);
     } else {
       list = topicQs.slice(0, n);
