@@ -62,6 +62,20 @@
       </div>
     </div>
 
+    <!-- Resume draft banner (hidden by default) -->
+    <div id="resume-banner" class="resume-banner" style="display:none">
+      <div class="rb-icon" id="rb-icon"></div>
+      <div class="rb-text">
+        <strong>Có buổi học chưa hoàn thành</strong>
+        <span id="rb-info"></span>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="App.resumeDraft()">
+        <span class="icon" data-icon="play" data-size="12"></span>
+        Tiếp tục
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="App.discardDraft()">Bỏ</button>
+    </div>
+
     <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-val" id="st-days">0</div><div class="stat-lbl">Ngày học</div></div>
@@ -442,6 +456,31 @@
     <div class="row-actions">
       <button class="btn btn-ghost" onclick="App.closeTeacherModal()">Hủy</button>
       <button class="btn btn-primary" onclick="App.saveTeacher()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- SESSION DETAIL / EDIT MODAL -->
+<div id="session-modal" class="modal-overlay">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h3 id="sm-title">Chi tiết buổi học</h3>
+      <button class="btn btn-ghost btn-icon" onclick="App.closeSessionModal()" title="Đóng (Esc)">
+        <span class="icon" data-icon="stop" data-size="12"></span>
+      </button>
+    </div>
+    <div class="modal-body" id="sm-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="App.deleteFromModal()">
+        <span class="icon" data-icon="trash" data-size="12"></span>
+        Xóa buổi này
+      </button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" onclick="App.closeSessionModal()">Đóng</button>
+      <button class="btn btn-primary" onclick="App.saveSessionEdit()">
+        <span class="icon" data-icon="check" data-size="13"></span>
+        Lưu chỉnh sửa
+      </button>
     </div>
   </div>
 </div>

@@ -57,6 +57,54 @@ const DB = {
   },
 };
 
+/* ─── DRAFT (autosave để khôi phục buổi học dở) ─── */
+const Draft = {
+  KEY: 'etb_draft',
+  load() { try { return JSON.parse(localStorage.getItem(this.KEY)); } catch { return null; } },
+  save(d) { try { localStorage.setItem(this.KEY, JSON.stringify({ ...d, _ts: Date.now() })); } catch {} },
+  clear() { localStorage.removeItem(this.KEY); },
+};
+
+function snapshotDraft() {
+  if (!S || !S.cur) return;
+  if (S.view === 'setup') {
+    const $ = id => document.getElementById(id);
+    Draft.save({
+      view: 'setup',
+      id: S.cur.id, date: S.cur.date, dayNum: S.cur.dayNum,
+      topic: $('inp-topic')?.value || '',
+      level: $('inp-level')?.value || 'B1+',
+      vcount: $('inp-vcount')?.value || '8',
+      qcount: $('inp-qcount')?.value || '5',
+      grammar: $('inp-grammar')?.value || '',
+      vocab: [...document.querySelectorAll('#vocab-rows .v-card')].map(c => ({
+        w: c.querySelector('.v-w')?.value || '',
+        ph: c.querySelector('.v-ph')?.value || '',
+        pos: c.querySelector('.v-pos')?.value || '',
+        m: c.querySelector('.v-m')?.value || '',
+        e: c.querySelector('.v-e')?.value || '',
+      })),
+      qs: [...document.querySelectorAll('#q-rows .q-txt')].map(i => i.value),
+      patterns: [...document.querySelectorAll('#pattern-rows .pattern-row')].map(r => ({
+        p: r.querySelector('.p-pat')?.value || '',
+        ex: (r.querySelector('.p-ex')?.value || '').split('\n').filter(Boolean),
+      })),
+    });
+  } else if (S.view === 'teach') {
+    Draft.save({
+      view: 'teach',
+      cur: { ...S.cur, elapsed: (S.timer && S.timer.elapsed) || S.cur.elapsed || 0 },
+      board: document.getElementById('bp-input')?.value || '',
+    });
+  }
+}
+
+let _draftDebounce = null;
+function debouncedDraftSave() {
+  clearTimeout(_draftDebounce);
+  _draftDebounce = setTimeout(snapshotDraft, 1200);
+}
+
 /* ─── TEACHER NAME ─── */
 const Teacher = {
   KEY: 'etb_teacher',
@@ -726,6 +774,8 @@ const App = {
     // clock
     const now = new Date();
     document.getElementById('dash-clock').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    // draft banner
+    this.checkDraft();
     // recent
     const sessions = DB.all().slice(0, 6);
     const el = document.getElementById('recent-list');
@@ -738,14 +788,14 @@ const App = {
       return;
     }
     el.innerHTML = sessions.map(s => `
-      <div class="session-row">
+      <div class="session-row" onclick="App.viewSession('${s.id}')" title="Click để xem chi tiết / chỉnh sửa">
         <div class="sess-day">${s.dayNum || '?'}</div>
         <div class="sess-info">
           <div class="sess-topic">${esc(s.topic)}</div>
           <div class="sess-meta">${esc(s.date)} · ${esc(s.level)} · ${s.vocab?.length || 0} từ · ${fmtDur(s.elapsed)}</div>
         </div>
         ${s.score != null ? `<div class="sess-score ${s.score >= 80 ? 'good' : ''}">${s.score}<small>/100</small></div>` : '<div class="muted" style="font-size:12px">–</div>'}
-        <button class="btn btn-ghost btn-icon sess-row-del" onclick="App.delSess('${s.id}')" title="Xóa">${ICONS.trash(14)}</button>
+        <button class="btn btn-ghost btn-icon sess-row-del" onclick="event.stopPropagation();App.delSess('${s.id}')" title="Xóa">${ICONS.trash(14)}</button>
       </div>`).join('');
   },
 
@@ -768,6 +818,10 @@ const App = {
 
   /* ── NEW SESSION ── */
   newSession() {
+    if (Draft.load()) {
+      if (!confirm('Bạn có buổi học chưa hoàn thành. Tạo mới sẽ bỏ buổi đang dở. Tiếp tục?')) return;
+      Draft.clear();
+    }
     S.cur = {
       id: String(Date.now()),
       date: today(),
@@ -1226,8 +1280,9 @@ const App = {
   },
 
   /* ── TIMER ── */
-  startTimer() {
-    S.timer = { secs: 1800, elapsed: 0, running: true, iv: null };
+  startTimer(resumeElapsed) {
+    const e = parseInt(resumeElapsed) || 0;
+    S.timer = { secs: 1800 - e, elapsed: e, running: true, iv: null };
     this._tick();
     S.timer.iv = setInterval(() => {
       if (!S.timer.running) return;
@@ -1282,6 +1337,7 @@ const App = {
     c.remembered = [...document.querySelectorAll('.recall-chip.ok')].map(el => el.dataset.w);
     c.done = true;
     DB.put(c);
+    Draft.clear();
     toast('Đã lưu buổi học!', 'ok');
     setTimeout(() => this.showView('dashboard'), 700);
   },
@@ -1295,14 +1351,14 @@ const App = {
       return;
     }
     el.innerHTML = `<div class="session-list">${sessions.map(s => `
-      <div class="session-row">
+      <div class="session-row" onclick="App.viewSession('${s.id}')" title="Click để xem chi tiết / chỉnh sửa">
         <div class="sess-day">${s.dayNum || '?'}</div>
         <div class="sess-info">
           <div class="sess-topic">${esc(s.topic)}</div>
           <div class="sess-meta">${esc(s.date)} · ${esc(s.level)} · ${s.vocab?.length || 0} từ · ${fmtDur(s.elapsed)}${s.remembered?.length ? ` · nhớ ${s.remembered.length}/${s.vocab?.length || 0}` : ''}${s.notes ? '<br><em style="color:var(--muted-soft)">' + esc(s.notes.substring(0, 100)) + (s.notes.length > 100 ? '...' : '') + '</em>' : ''}</div>
         </div>
         ${s.score != null ? `<div class="sess-score ${s.score >= 80 ? 'good' : ''}">${s.score}<small>/100</small></div>` : ''}
-        <button class="btn btn-ghost btn-icon sess-row-del" onclick="App.delSess('${s.id}')" title="Xóa">${ICONS.trash(14)}</button>
+        <button class="btn btn-ghost btn-icon sess-row-del" onclick="event.stopPropagation();App.delSess('${s.id}')" title="Xóa">${ICONS.trash(14)}</button>
       </div>`).join('')}</div>`;
   },
   delSess(id) {
@@ -1314,6 +1370,173 @@ const App = {
     if (!confirm('Xóa TẤT CẢ lịch sử buổi học? Không thể khôi phục!')) return;
     DB.clear(); this.renderHist(); this.renderDash();
     toast('Đã xóa tất cả');
+  },
+
+  /* ── DRAFT (resume) ── */
+  checkDraft() {
+    const banner = document.getElementById('resume-banner');
+    if (!banner) return;
+    const d = Draft.load();
+    if (!d) { banner.style.display = 'none'; return; }
+    banner.style.display = 'flex';
+    const ic = document.getElementById('rb-icon');
+    if (ic) ic.innerHTML = ICONS.refresh(20);
+    const when = new Date(d._ts || Date.now()).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const topic = (d.view === 'teach' ? d.cur?.topic : d.topic) || '(chưa có chủ đề)';
+    const mode = d.view === 'teach' ? 'Đang dạy' : 'Đang soạn';
+    document.getElementById('rb-info').textContent = `${mode} "${topic}" · lưu lúc ${when}`;
+  },
+
+  resumeDraft() {
+    const d = Draft.load();
+    if (!d) { toast('Không có buổi học đang dở', 'err'); return; }
+    if (d.view === 'setup') {
+      S.cur = {
+        id: d.id || String(Date.now()),
+        date: d.date || today(),
+        dayNum: d.dayNum || (DB.all().filter(x => x.done).length + 1),
+        topic: '', level: 'B1+', vocab: [], qs: [], patterns: [], grammar: '',
+        elapsed: 0, score: null, notes: '', done: false, remembered: [],
+      };
+      this.showView('setup');
+      setTimeout(() => {
+        document.getElementById('inp-topic').value = d.topic || '';
+        document.getElementById('inp-level').value = d.level || 'B1+';
+        document.getElementById('inp-vcount').value = d.vcount || '8';
+        document.getElementById('inp-qcount').value = d.qcount || '5';
+        document.getElementById('inp-grammar').value = d.grammar || '';
+        this.renderFcConfig();
+        this.buildVocabRows(Math.max((d.vocab || []).length, 1), d.vocab || []);
+        this.buildQRows((d.qs || []).length ? d.qs : ['']);
+        this.buildPatternRows((d.patterns || []).length ? d.patterns : []);
+        this.renderGrammarChips(d.topic || '');
+        toast('Đã khôi phục buổi học đang soạn', 'ok');
+      }, 30);
+    } else if (d.view === 'teach' && d.cur) {
+      S.cur = d.cur;
+      this.renderTeach();
+      this.showView('teach');
+      Present.setTopic(S.cur.topic);
+      const bp = document.getElementById('bp-input');
+      if (bp) { bp.value = d.board || ''; this.onBoardInput(); }
+      this.startTimer(d.cur.elapsed || 0);
+      toast('Đã khôi phục buổi học đang dạy', 'ok');
+    }
+  },
+
+  discardDraft() {
+    if (!confirm('Bỏ buổi học chưa hoàn thành? Toàn bộ nội dung đã soạn sẽ mất.')) return;
+    Draft.clear();
+    this.checkDraft();
+    toast('Đã bỏ buổi dở');
+  },
+
+  /* ── SESSION DETAIL / EDIT MODAL ── */
+  viewSession(id) {
+    const s = DB.all().find(x => x.id === id);
+    if (!s) { toast('Không tìm thấy buổi học', 'err'); return; }
+    this._editingId = id;
+    document.getElementById('sm-title').textContent = `${s.topic} · Buổi ${s.dayNum || '?'}`;
+    const body = document.getElementById('sm-body');
+    body.innerHTML = `
+      <div class="sm-meta-row">
+        <strong>${esc(s.date)}</strong> · ${esc(s.level)} · ${fmtDur(s.elapsed)} · ${(s.vocab || []).length} từ · ${(s.qs || []).length} câu hỏi
+      </div>
+
+      <div class="sm-grid-2">
+        <div class="sm-section">
+          <h4>Điểm</h4>
+          <div class="sm-score-row">
+            <span class="sm-score-big" id="sm-score-display">${s.score ?? 0}</span><small>/100</small>
+          </div>
+          <input type="range" id="sm-score" class="score-range" min="0" max="100" value="${s.score ?? 75}" oninput="document.getElementById('sm-score-display').textContent=this.value">
+        </div>
+        <div class="sm-section">
+          <h4>Từ vựng nhớ được (<span id="sm-recall-count">${(s.remembered || []).length}</span>/${(s.vocab || []).length})</h4>
+          <div class="recall-grid" id="sm-recall">${(s.vocab || []).map(v => `
+            <div class="recall-chip ${(s.remembered || []).includes(v.w) ? 'ok' : ''}" onclick="this.classList.toggle('ok');App._updateRecallCount()" data-w="${esc(v.w)}">
+              <span class="ck">${ICONS.check(10)}</span>${esc(v.w)}
+            </div>`).join('') || '<div class="muted" style="font-size:13px">Không có từ vựng</div>'}</div>
+        </div>
+      </div>
+
+      <div class="sm-section">
+        <h4>Từ vựng đã dạy (${(s.vocab || []).length})</h4>
+        <div class="sm-vocab-grid">${(s.vocab || []).map(v => `
+          <div class="sm-v-card">
+            <div class="sm-v-head">
+              <span class="sm-v-w">${esc(v.w)}</span>
+              ${v.ph ? `<span class="sm-v-ph">${esc(v.ph)}</span>` : ''}
+              ${v.pos ? `<span class="sm-v-pos">${esc(v.pos)}</span>` : ''}
+            </div>
+            ${v.m ? `<div class="sm-v-m">${esc(v.m)}</div>` : ''}
+            ${v.e ? `<div class="sm-v-e">"${esc(v.e)}"</div>` : ''}
+          </div>`).join('') || '<div class="muted" style="font-size:13px">Không có</div>'}</div>
+      </div>
+
+      <div class="sm-grid-2">
+        <div class="sm-section">
+          <h4>Câu hỏi (${(s.qs || []).length})</h4>
+          <ol class="sm-qs">${(s.qs || []).map(q => `<li>${esc(q)}</li>`).join('') || '<li class="muted">Không có</li>'}</ol>
+        </div>
+        <div class="sm-section">
+          <h4>Mẫu câu (${(s.patterns || []).length})</h4>
+          <div class="sm-patterns">${(s.patterns || []).map(pt => `
+            <div class="sm-pt">
+              <strong>${esc(pt.p)}</strong>
+              ${(pt.ex || []).length ? `<ul>${pt.ex.map(e => `<li>${esc(e)}</li>`).join('')}</ul>` : ''}
+            </div>`).join('') || '<div class="muted" style="font-size:13px">Không có</div>'}</div>
+        </div>
+      </div>
+
+      <div class="sm-section">
+        <h4>Ghi chú ngữ pháp</h4>
+        <div class="sm-grammar">${s.grammar ? esc(s.grammar) : '<span class="muted">Không có</span>'}</div>
+      </div>
+
+      <div class="sm-section">
+        <h4>Nhận xét buổi học (có thể chỉnh sửa)</h4>
+        <textarea id="sm-notes" class="input" rows="4" placeholder="Tiến bộ? Lỗi cần ôn? Kế hoạch buổi sau...">${esc(s.notes || '')}</textarea>
+      </div>
+    `;
+    document.getElementById('session-modal').classList.add('active');
+  },
+
+  _updateRecallCount() {
+    const el = document.getElementById('sm-recall-count');
+    if (el) el.textContent = document.querySelectorAll('#sm-recall .recall-chip.ok').length;
+  },
+
+  saveSessionEdit() {
+    const id = this._editingId;
+    if (!id) return;
+    const all = DB.all();
+    const s = all.find(x => x.id === id);
+    if (!s) return;
+    s.score = parseInt(document.getElementById('sm-score').value);
+    s.notes = document.getElementById('sm-notes').value.trim();
+    s.remembered = [...document.querySelectorAll('#sm-recall .recall-chip.ok')].map(el => el.dataset.w);
+    DB.put(s);
+    this.closeSessionModal();
+    this.renderHist();
+    this.renderDash();
+    toast('Đã lưu chỉnh sửa', 'ok');
+  },
+
+  deleteFromModal() {
+    const id = this._editingId;
+    if (!id) return;
+    if (!confirm('Xóa buổi học này?')) return;
+    DB.del(id);
+    this.closeSessionModal();
+    this.renderHist();
+    this.renderDash();
+    toast('Đã xóa');
+  },
+
+  closeSessionModal() {
+    document.getElementById('session-modal').classList.remove('active');
+    this._editingId = null;
   },
 
   /* ── KEYBOARD ── */
@@ -1357,6 +1580,20 @@ function init() {
     if (e.key === 'Enter') App.saveTeacher();
     if (e.key === 'Escape') App.closeTeacherModal();
   });
+  // session detail modal — close on overlay click + Escape
+  const sm = document.getElementById('session-modal');
+  if (sm) {
+    sm.addEventListener('click', (e) => { if (e.target.id === 'session-modal') App.closeSessionModal(); });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sm && sm.classList.contains('active')) App.closeSessionModal();
+  });
+  // AUTOSAVE: debounced save on any input + 5s interval + save before unload
+  document.addEventListener('input', () => {
+    if (S.view === 'setup' || S.view === 'teach') debouncedDraftSave();
+  });
+  setInterval(snapshotDraft, 5000);
+  window.addEventListener('beforeunload', snapshotDraft);
 }
 
 document.addEventListener('DOMContentLoaded', init);
