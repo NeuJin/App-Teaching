@@ -1099,14 +1099,59 @@ input[type=range].score-range::-moz-range-thumb {
   .modal-large .modal-body { padding: 14px 18px; }
 }
 
-/* ─── AI SETTINGS MODAL ─── */
-#ai-status-btn.on {
+/* ─── AI TOGGLE SWITCH (dash-profile) ─── */
+.ai-toggle-row {
+  display: flex; align-items: center; gap: 6px;
+}
+.switch {
+  position: relative; display: inline-block;
+  width: 38px; height: 22px;
+  cursor: pointer; flex-shrink: 0;
+}
+.switch input {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.switch .slider {
+  position: absolute; inset: 0;
+  background: var(--muted-soft);
+  border-radius: 999px;
+  transition: background .18s;
+}
+.switch .slider::before {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  left: 3px; top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform .22s cubic-bezier(.4,.2,.2,1);
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+.switch input:checked + .slider {
+  background: var(--accent);
+}
+.switch input:checked + .slider::before {
+  transform: translateX(16px);
+}
+.switch:hover .slider { filter: brightness(1.05); }
+
+.ai-settings-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); padding: 4px 5px; border-radius: 6px;
+  display: inline-flex; align-items: center;
+  transition: color .15s, background .15s;
+}
+.ai-settings-btn:hover {
   color: var(--accent);
   background: var(--accent-soft);
 }
-#ai-status-btn.on #ai-status-text {
-  color: var(--accent);
-  font-weight: 700;
+
+/* AI Studio CTA button trong modal */
+.ai-cta {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 14px;
+  padding: 12px 16px;
 }
 
 .ai-info {

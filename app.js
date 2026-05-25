@@ -108,6 +108,7 @@ function debouncedDraftSave() {
 /* ─── AI (Gemini) — sinh câu hỏi thông minh ─── */
 const AI = {
   KEY_STORAGE: 'etb_ai_key',
+  ACTIVE_STORAGE: 'etb_ai_active',
   MODEL: 'gemini-2.0-flash',
   get key() { return (localStorage.getItem(this.KEY_STORAGE) || '').trim(); },
   set key(v) {
@@ -115,7 +116,16 @@ const AI = {
     if (t) localStorage.setItem(this.KEY_STORAGE, t);
     else localStorage.removeItem(this.KEY_STORAGE);
   },
-  enabled() { return !!this.key; },
+  get isActive() {
+    // Active chỉ khi có key VÀ toggle bật (default ON khi mới lưu key)
+    if (!this.key) return false;
+    return localStorage.getItem(this.ACTIVE_STORAGE) !== 'false';
+  },
+  set isActive(v) {
+    localStorage.setItem(this.ACTIVE_STORAGE, v ? 'true' : 'false');
+  },
+  hasKey() { return !!this.key; },
+  enabled() { return this.isActive; }, // backward-compat: enabled === active
 
   async _call(prompt, opts, overrideKey) {
     const key = overrideKey || this.key;
@@ -867,12 +877,9 @@ const App = {
     document.getElementById('teacher-name').textContent = Teacher.get();
     document.getElementById('teacher-initials').textContent = Teacher.initials();
     document.getElementById('hero-greeting').innerHTML = `Chào <span style="font-style:italic">${esc(Teacher.get())}</span>, <em>sẵn sàng cho buổi học chưa?</em>`;
-    // AI status chip
-    const aiOn = AI.enabled();
-    const aiText = document.getElementById('ai-status-text');
-    const aiBtn = document.getElementById('ai-status-btn');
-    if (aiText) aiText.textContent = aiOn ? 'Gemini: ON' : 'chưa bật';
-    if (aiBtn) aiBtn.classList.toggle('on', aiOn);
+    // AI toggle state (đồng bộ với localStorage)
+    const aiToggle = document.getElementById('ai-toggle');
+    if (aiToggle) aiToggle.checked = AI.enabled();
     // clock
     const now = new Date();
     document.getElementById('dash-clock').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -919,6 +926,19 @@ const App = {
   },
 
   /* ── AI SETTINGS ── */
+  toggleAI(on) {
+    if (on && !AI.hasKey()) {
+      // Chưa có key → mở modal nhập, đồng thời gạt toggle về OFF
+      const t = document.getElementById('ai-toggle');
+      if (t) t.checked = false;
+      this.openAISettings();
+      toast('Cài API key Gemini trước đã (chỉ làm 1 lần)', '');
+      return;
+    }
+    AI.isActive = !!on;
+    this.renderDash();
+    toast(on ? '✨ AI Gemini đã BẬT' : 'AI đã TẮT — dùng bộ câu hỏi sẵn', 'ok');
+  },
   openAISettings() {
     document.getElementById('ai-key-input').value = AI.key || '';
     document.getElementById('ai-test-status').innerHTML = '';
@@ -931,13 +951,15 @@ const App = {
   saveAIKey() {
     const v = document.getElementById('ai-key-input').value.trim();
     AI.key = v;
+    if (v) AI.isActive = true; // lưu key mới thì auto bật
     this.closeAISettings();
     this.renderDash();
-    toast(v ? 'Đã lưu API key — AI Gemini đã bật' : 'Đã xóa API key', 'ok');
+    toast(v ? '✨ Đã lưu API key — AI Gemini đã bật' : 'Đã xóa API key', 'ok');
   },
   clearAIKey() {
     if (!confirm('Xóa API key? AI sẽ tắt, app trở về dùng bộ câu hỏi sẵn.')) return;
     AI.key = '';
+    AI.isActive = false;
     document.getElementById('ai-key-input').value = '';
     document.getElementById('ai-test-status').innerHTML = '';
     this.renderDash();
@@ -1762,6 +1784,16 @@ function init() {
   const am = document.getElementById('ai-modal');
   if (am) {
     am.addEventListener('click', (e) => { if (e.target.id === 'ai-modal') App.closeAISettings(); });
+  }
+  // AI key input — auto-test khi paste 1 key Gemini hợp lệ
+  const aiKeyInp = document.getElementById('ai-key-input');
+  if (aiKeyInp) {
+    aiKeyInp.addEventListener('paste', () => {
+      setTimeout(() => {
+        const v = aiKeyInp.value.trim();
+        if (v.startsWith('AIza') && v.length > 30) App.testAIKey();
+      }, 60);
+    });
   }
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;

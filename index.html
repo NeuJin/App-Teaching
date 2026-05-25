@@ -41,12 +41,16 @@
       </div>
       <div class="divider"></div>
       <div class="field">
-        <div class="label">AI</div>
-        <button class="val" id="ai-status-btn" onclick="App.openAISettings()" title="Cài Gemini để sinh câu hỏi thông minh">
-          <span class="icon" data-icon="sparkle" data-size="11"></span>
-          <span id="ai-status-text">chưa bật</span>
-          <span class="icon" data-icon="pencil" data-size="11"></span>
-        </button>
+        <div class="label">AI Gemini</div>
+        <div class="ai-toggle-row">
+          <label class="switch" title="Bật / tắt AI Gemini">
+            <input type="checkbox" id="ai-toggle" onchange="App.toggleAI(this.checked)">
+            <span class="slider"></span>
+          </label>
+          <button class="ai-settings-btn" onclick="App.openAISettings()" title="Cài API key">
+            <span class="icon" data-icon="pencil" data-size="11"></span>
+          </button>
+        </div>
       </div>
       <span class="clock" id="dash-clock">—</span>
     </div>
@@ -485,23 +489,30 @@
     </div>
     <div class="modal-body">
       <p>Dùng <strong>Gemini của Google</strong> để sinh câu hỏi thảo luận tự nhiên, sát chủ đề và trình độ — thay cho bộ câu hỏi sẵn.</p>
+
+      <a class="btn btn-primary btn-block ai-cta" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">
+        <span class="icon" data-icon="sparkle" data-size="13"></span>
+        Mở Google AI Studio để lấy key
+        <span style="opacity:.7;font-size:11px;margin-left:4px">(tab mới)</span>
+      </a>
+
       <div class="ai-info">
         <strong>Free tier:</strong> 15 yêu cầu/phút, 1500/ngày. Soạn 1 buổi/ngày dùng ~1 yêu cầu → quá đủ.
       </div>
 
-      <h4 style="margin-top:18px;font-size:13px;color:var(--ink)">Cách lấy API key (miễn phí)</h4>
       <ol class="ai-steps">
-        <li>Mở <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></li>
-        <li>Đăng nhập bằng tài khoản Google</li>
-        <li>Bấm <strong>"Create API key"</strong> → chọn project (hoặc tạo mới)</li>
-        <li>Copy key (bắt đầu bằng <code>AIza...</code>) và dán xuống dưới</li>
+        <li>Bấm nút <strong>"Mở Google AI Studio"</strong> ở trên (đăng nhập Google nếu cần)</li>
+        <li>Bấm <strong>"Create API key"</strong> → copy key bắt đầu bằng <code>AIza...</code></li>
+        <li>Dán vào ô bên dưới — sẽ <strong>tự động test</strong> ngay</li>
+        <li>Bấm <strong>Lưu</strong> → sau đó dùng toggle trên dashboard để bật/tắt</li>
       </ol>
 
       <label class="label" style="margin-top:12px">API key</label>
-      <input id="ai-key-input" class="input input-lg mono" type="password" placeholder="AIzaSy..." autocomplete="off" spellcheck="false" />
+      <input id="ai-key-input" class="input input-lg mono" type="password" placeholder="Paste key tại đây — auto-test khi nhận diện AIza..." autocomplete="off" spellcheck="false" />
 
       <div class="ai-privacy">
-        Key chỉ lưu trên trình duyệt của bạn (localStorage), không gửi đi đâu ngoài Google. Trên máy chung nên xóa key sau khi dùng.
+        <strong>Vì sao không tự lấy được key?</strong> Google không cho phép app khác tự tạo key giúp (đó là bảo mật của họ — đúng vậy). Bạn chỉ cần làm 1 lần duy nhất, key sẽ lưu trong trình duyệt.<br>
+        Key chỉ lưu trên máy bạn (localStorage), gọi thẳng tới Google, không qua server trung gian.
       </div>
 
       <div id="ai-test-status" class="ai-status"></div>
