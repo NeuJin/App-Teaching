@@ -39,6 +39,15 @@
           Học viên
         </span>
       </div>
+      <div class="divider"></div>
+      <div class="field">
+        <div class="label">AI</div>
+        <button class="val" id="ai-status-btn" onclick="App.openAISettings()" title="Cài Gemini để sinh câu hỏi thông minh">
+          <span class="icon" data-icon="sparkle" data-size="11"></span>
+          <span id="ai-status-text">chưa bật</span>
+          <span class="icon" data-icon="pencil" data-size="11"></span>
+        </button>
+      </div>
       <span class="clock" id="dash-clock">—</span>
     </div>
 
@@ -458,6 +467,53 @@
     <div class="row-actions">
       <button class="btn btn-ghost" onclick="App.closeTeacherModal()">Hủy</button>
       <button class="btn btn-primary" onclick="App.saveTeacher()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI SETTINGS MODAL -->
+<div id="ai-modal" class="modal-overlay">
+  <div class="modal modal-large" style="max-width: 540px;">
+    <div class="modal-header">
+      <h3>
+        <span class="icon" data-icon="sparkle" data-size="14" style="color:var(--accent)"></span>
+        Cài đặt AI (Gemini)
+      </h3>
+      <button class="btn btn-ghost btn-icon" onclick="App.closeAISettings()" title="Đóng (Esc)">
+        <span class="icon" data-icon="stop" data-size="12"></span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Dùng <strong>Gemini của Google</strong> để sinh câu hỏi thảo luận tự nhiên, sát chủ đề và trình độ — thay cho bộ câu hỏi sẵn.</p>
+      <div class="ai-info">
+        <strong>Free tier:</strong> 15 yêu cầu/phút, 1500/ngày. Soạn 1 buổi/ngày dùng ~1 yêu cầu → quá đủ.
+      </div>
+
+      <h4 style="margin-top:18px;font-size:13px;color:var(--ink)">Cách lấy API key (miễn phí)</h4>
+      <ol class="ai-steps">
+        <li>Mở <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></li>
+        <li>Đăng nhập bằng tài khoản Google</li>
+        <li>Bấm <strong>"Create API key"</strong> → chọn project (hoặc tạo mới)</li>
+        <li>Copy key (bắt đầu bằng <code>AIza...</code>) và dán xuống dưới</li>
+      </ol>
+
+      <label class="label" style="margin-top:12px">API key</label>
+      <input id="ai-key-input" class="input input-lg mono" type="password" placeholder="AIzaSy..." autocomplete="off" spellcheck="false" />
+
+      <div class="ai-privacy">
+        Key chỉ lưu trên trình duyệt của bạn (localStorage), không gửi đi đâu ngoài Google. Trên máy chung nên xóa key sau khi dùng.
+      </div>
+
+      <div id="ai-test-status" class="ai-status"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="App.clearAIKey()">Xóa key</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" onclick="App.testAIKey()">Test key</button>
+      <button class="btn btn-primary" onclick="App.saveAIKey()">
+        <span class="icon" data-icon="check" data-size="13"></span>
+        Lưu
+      </button>
     </div>
   </div>
 </div>

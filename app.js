@@ -105,6 +105,89 @@ function debouncedDraftSave() {
   _draftDebounce = setTimeout(snapshotDraft, 1200);
 }
 
+/* ─── AI (Gemini) — sinh câu hỏi thông minh ─── */
+const AI = {
+  KEY_STORAGE: 'etb_ai_key',
+  MODEL: 'gemini-2.0-flash',
+  get key() { return (localStorage.getItem(this.KEY_STORAGE) || '').trim(); },
+  set key(v) {
+    const t = (v || '').trim();
+    if (t) localStorage.setItem(this.KEY_STORAGE, t);
+    else localStorage.removeItem(this.KEY_STORAGE);
+  },
+  enabled() { return !!this.key; },
+
+  async _call(prompt, opts, overrideKey) {
+    const key = overrideKey || this.key;
+    if (!key) throw new Error('Chưa có API key');
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.MODEL}:generateContent?key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: Object.assign({ temperature: 0.9, maxOutputTokens: 1024 }, opts || {}),
+      }),
+    });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try { const e = await res.json(); msg = e?.error?.message || msg; } catch {}
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error('Phản hồi rỗng từ Gemini');
+    return text;
+  },
+
+  async generateQuestions(topic, level, count, vocab) {
+    const text = await this._call(buildQuestionPrompt(topic, level, count, vocab));
+    const cleaned = text.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim();
+    let arr;
+    try { arr = JSON.parse(cleaned); }
+    catch {
+      const m = cleaned.match(/\[[\s\S]*\]/);
+      if (m) { try { arr = JSON.parse(m[0]); } catch {} }
+    }
+    if (!Array.isArray(arr)) throw new Error('AI không trả về JSON array hợp lệ');
+    return arr.map(s => String(s).trim()).filter(Boolean);
+  },
+
+  async test(explicitKey) {
+    return await this._call('Reply with the single word: ok', { maxOutputTokens: 10, temperature: 0 }, explicitKey);
+  },
+};
+
+function buildQuestionPrompt(topic, level, count, vocab) {
+  const guide = {
+    'A2': 'simple present and past tenses, common everyday vocabulary, short concrete questions',
+    'B1': 'present perfect, basic conditionals, questions about experiences and personal opinions',
+    'B1+': 'comparisons, abstract concepts, modal verbs, more nuanced opinions and reasoning',
+    'B2': 'hypotheticals, abstract reasoning, complex grammar, debate-style questions',
+  };
+  const vocabHint = vocab && vocab.length
+    ? `\n\nThe student is practicing these target vocabulary words today: ${vocab.slice(0, 12).join(', ')}.\nNaturally weave 1-2 of these words into 1-2 of your questions (do NOT force more than that).`
+    : '';
+  return `You are an experienced ESL teacher creating discussion questions for a 1-on-1 English conversation lesson.
+
+Topic: "${topic}"
+Student CEFR level: ${level} — ${guide[level] || guide['B1+']}
+Number of questions: ${count}${vocabHint}
+
+Requirements:
+- Each question must sound natural, like something a thoughtful teacher would actually ask in a real conversation lesson.
+- Mix question types: personal experience, opinions, hypotheticals ("if you could..."), comparisons, "tell me about a time when...", "what would you do if...".
+- Avoid rigid templates like "What do you think about ${topic}?" — be creative and specific to the topic.
+- Match the language complexity exactly to the level described above.
+- Every question must have a different shape; do not repeat the same structure.
+- Questions should naturally lead to longer, richer answers (avoid yes/no-only questions).
+
+Output: ONLY a JSON array of exactly ${count} strings. No markdown fences, no explanation, no extra text.
+
+Format example:
+["Question 1?", "Question 2?", "Question 3?"]`;
+}
+
 /* ─── TEACHER NAME ─── */
 const Teacher = {
   KEY: 'etb_teacher',
@@ -784,6 +867,12 @@ const App = {
     document.getElementById('teacher-name').textContent = Teacher.get();
     document.getElementById('teacher-initials').textContent = Teacher.initials();
     document.getElementById('hero-greeting').innerHTML = `Chào <span style="font-style:italic">${esc(Teacher.get())}</span>, <em>sẵn sàng cho buổi học chưa?</em>`;
+    // AI status chip
+    const aiOn = AI.enabled();
+    const aiText = document.getElementById('ai-status-text');
+    const aiBtn = document.getElementById('ai-status-btn');
+    if (aiText) aiText.textContent = aiOn ? 'Gemini: ON' : 'chưa bật';
+    if (aiBtn) aiBtn.classList.toggle('on', aiOn);
     // clock
     const now = new Date();
     document.getElementById('dash-clock').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -827,6 +916,47 @@ const App = {
   },
   closeTeacherModal() {
     document.getElementById('teacher-modal').classList.remove('active');
+  },
+
+  /* ── AI SETTINGS ── */
+  openAISettings() {
+    document.getElementById('ai-key-input').value = AI.key || '';
+    document.getElementById('ai-test-status').innerHTML = '';
+    document.getElementById('ai-modal').classList.add('active');
+    setTimeout(() => document.getElementById('ai-key-input').focus(), 50);
+  },
+  closeAISettings() {
+    document.getElementById('ai-modal').classList.remove('active');
+  },
+  saveAIKey() {
+    const v = document.getElementById('ai-key-input').value.trim();
+    AI.key = v;
+    this.closeAISettings();
+    this.renderDash();
+    toast(v ? 'Đã lưu API key — AI Gemini đã bật' : 'Đã xóa API key', 'ok');
+  },
+  clearAIKey() {
+    if (!confirm('Xóa API key? AI sẽ tắt, app trở về dùng bộ câu hỏi sẵn.')) return;
+    AI.key = '';
+    document.getElementById('ai-key-input').value = '';
+    document.getElementById('ai-test-status').innerHTML = '';
+    this.renderDash();
+    toast('Đã xóa API key');
+  },
+  async testAIKey() {
+    const v = document.getElementById('ai-key-input').value.trim();
+    if (!v) { toast('Nhập key trước đã!', 'err'); return; }
+    const status = document.getElementById('ai-test-status');
+    status.innerHTML = `<span class="spin">${ICONS.refresh(12)}</span> Đang test với Gemini...`;
+    status.className = 'ai-status';
+    try {
+      await AI.test(v);
+      status.innerHTML = '✓ Key hợp lệ — Gemini phản hồi OK. Bấm <strong>Lưu</strong> để dùng.';
+      status.className = 'ai-status ok';
+    } catch (e) {
+      status.innerHTML = '✗ Lỗi: ' + esc((e.message || '').substring(0, 120));
+      status.className = 'ai-status err';
+    }
   },
 
   /* ── NEW SESSION ── */
@@ -955,14 +1085,15 @@ const App = {
     a[a.length - 1]?.focus();
   },
 
-  genQuestions() {
+  async genQuestions() {
     const topic = document.getElementById('inp-topic').value.trim();
     if (!topic) { toast('Nhập chủ đề trước đã!', 'err'); return; }
     const level = document.getElementById('inp-level').value;
     const qcount = parseInt(document.getElementById('inp-qcount').value) || 5;
-    const n = this.buildQuestionsFor(topic, level, qcount);
+    if (AI.enabled()) toast(`<span class="spin">${ICONS.refresh(12)}</span> AI đang nghĩ...`, '');
+    const n = await this.buildQuestionsFor(topic, level, qcount);
     this.autoFillGrammar(true);
-    toast(`Đã tạo ${n} câu hỏi cho trình độ <b>${esc(level)}</b> + gợi ý ngữ pháp`, 'ok');
+    toast(`Đã tạo ${n} câu hỏi (<b>${esc(this._lastQSource || level)}</b>) + gợi ý ngữ pháp`, 'ok');
   },
 
   autoFillGrammar(silent) {
@@ -1017,10 +1148,11 @@ const App = {
     const btn = document.getElementById('gen-btn');
     const old = btn.innerHTML; btn.disabled = true;
     const vmsg = (await this.populateVocab(topic, vcount, btn)).msg;
-    const qn = this.buildQuestionsFor(topic, level, qcount);
+    if (AI.enabled() && btn) btn.innerHTML = `<span class="spin">${ICONS.refresh(12)}</span> AI đang nghĩ câu hỏi...`;
+    const qn = await this.buildQuestionsFor(topic, level, qcount);
     this.autoFillGrammar(true);
     btn.innerHTML = old; btn.disabled = false;
-    toast(`Đã tạo: ${vmsg} · ${qn} câu hỏi (${esc(level)}) · gợi ý ngữ pháp`, 'ok');
+    toast(`Đã tạo: ${vmsg} · ${qn} câu hỏi (<b>${esc(this._lastQSource || level)}</b>) · gợi ý ngữ pháp`, 'ok');
   },
 
   /* ── tìm + điền từ vựng (Datamuse + bộ sẵn + tra từ điển) ── */
@@ -1053,22 +1185,38 @@ const App = {
     toast(`Đã tạo từ vựng: ${r.msg}`, r.count ? 'ok' : 'err');
   },
 
-  buildQuestionsFor(topic, level, count) {
-    const t = topic.toLowerCase();
+  async buildQuestionsFor(topic, level, count) {
     const n = Math.max(1, count);
-    const key = matchTopicKey(t);
     const words = [...document.querySelectorAll('#vocab-rows .v-w')].map(i => i.value.trim()).filter(Boolean);
 
-    // 1) Câu hỏi chính: ưu tiên bộ hand-crafted nếu chủ đề khớp; fallback sang template chung
+    // 1) Ưu tiên AI nếu có key — sinh câu hỏi sát chủ đề & trình độ
+    if (AI.enabled()) {
+      try {
+        const arr = await AI.generateQuestions(topic, level, n, words);
+        if (arr.length) {
+          this.buildQRows(arr.slice(0, n));
+          this._lastQSource = 'AI';
+          return Math.min(arr.length, n);
+        }
+      } catch (e) {
+        toast(`⚠️ AI lỗi: ${esc((e.message || '').substring(0, 80))} — dùng bộ sẵn`, 'err');
+      }
+    }
+
+    // 2) Fallback: bộ hand-crafted theo chủ đề; nếu không khớp dùng template chung
+    const t = topic.toLowerCase();
+    const key = matchTopicKey(t);
     let topicQs;
     if (key && TOPIC_QUESTIONS[key] && TOPIC_QUESTIONS[key][level]) {
       topicQs = shuffle(TOPIC_QUESTIONS[key][level]);
+      this._lastQSource = `bộ ${key}`;
     } else {
       const tpl = QUESTION_TEMPLATES[level] || QUESTION_TEMPLATES['B1+'];
       topicQs = shuffle(tpl).map(q => q.replace(/\{t\}/g, t));
+      this._lastQSource = 'bộ chung';
     }
 
-    // 2) Trộn vài câu gắn với từ vựng (~20%, tối đa 3) nếu có vocab và n đủ lớn
+    // 3) Trộn vài câu gắn với từ vựng (~20%, tối đa 3) nếu có vocab và n đủ lớn
     let list;
     if (words.length && n >= 4) {
       const nVocab = Math.min(Math.max(1, Math.round(n / 5)), words.length, 3);
@@ -1610,8 +1758,15 @@ function init() {
   if (sm) {
     sm.addEventListener('click', (e) => { if (e.target.id === 'session-modal') App.closeSessionModal(); });
   }
+  // AI settings modal — close on overlay click
+  const am = document.getElementById('ai-modal');
+  if (am) {
+    am.addEventListener('click', (e) => { if (e.target.id === 'ai-modal') App.closeAISettings(); });
+  }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && sm && sm.classList.contains('active')) App.closeSessionModal();
+    if (e.key !== 'Escape') return;
+    if (sm && sm.classList.contains('active')) App.closeSessionModal();
+    if (am && am.classList.contains('active')) App.closeAISettings();
   });
   // AUTOSAVE: debounced save on any input + 5s interval + save before unload
   document.addEventListener('input', () => {
