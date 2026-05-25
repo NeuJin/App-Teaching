@@ -105,11 +105,13 @@ function debouncedDraftSave() {
   _draftDebounce = setTimeout(snapshotDraft, 1200);
 }
 
-/* ─── AI (Gemini) — sinh câu hỏi thông minh ─── */
+/* ─── AI (Anthropic Claude) — sinh câu hỏi thông minh ─── */
 const AI = {
   KEY_STORAGE: 'etb_ai_key',
   ACTIVE_STORAGE: 'etb_ai_active',
-  MODEL: 'gemini-2.0-flash',
+  MODEL: 'claude-haiku-4-5', // nhanh + rẻ; chuyển sang sonnet/opus nếu cần thông minh hơn
+  PROVIDER: 'Claude',
+  ENDPOINT: 'https://api.anthropic.com/v1/messages',
   get key() { return (localStorage.getItem(this.KEY_STORAGE) || '').trim(); },
   set key(v) {
     const t = (v || '').trim();
@@ -130,23 +132,33 @@ const AI = {
   async _call(prompt, opts, overrideKey) {
     const key = overrideKey || this.key;
     if (!key) throw new Error('Chưa có API key');
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.MODEL}:generateContent?key=${encodeURIComponent(key)}`;
-    const res = await fetch(url, {
+    const res = await fetch(this.ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        // Cho phép gọi trực tiếp từ trình duyệt — Anthropic yêu cầu opt-in tường minh
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: Object.assign({ temperature: 0.9, maxOutputTokens: 1024 }, opts || {}),
+        model: this.MODEL,
+        max_tokens: (opts && opts.max_tokens) || 1024,
+        temperature: (opts && opts.temperature != null) ? opts.temperature : 0.9,
+        messages: [{ role: 'user', content: prompt }],
       }),
     });
     if (!res.ok) {
       let msg = `HTTP ${res.status}`;
-      try { const e = await res.json(); msg = e?.error?.message || msg; } catch {}
+      try {
+        const e = await res.json();
+        msg = e?.error?.message || e?.message || msg;
+      } catch {}
       throw new Error(msg);
     }
     const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error('Phản hồi rỗng từ Gemini');
+    const text = data?.content?.[0]?.text;
+    if (!text) throw new Error('Phản hồi rỗng từ Claude');
     return text;
   },
 
@@ -164,7 +176,7 @@ const AI = {
   },
 
   async test(explicitKey) {
-    return await this._call('Reply with the single word: ok', { maxOutputTokens: 10, temperature: 0 }, explicitKey);
+    return await this._call('Reply with the single word: ok', { max_tokens: 20, temperature: 0 }, explicitKey);
   },
 };
 
@@ -932,12 +944,12 @@ const App = {
       const t = document.getElementById('ai-toggle');
       if (t) t.checked = false;
       this.openAISettings();
-      toast('Cài API key Gemini trước đã (chỉ làm 1 lần)', '');
+      toast('Cài API key Claude trước đã (chỉ làm 1 lần)', '');
       return;
     }
     AI.isActive = !!on;
     this.renderDash();
-    toast(on ? '✨ AI Gemini đã BẬT' : 'AI đã TẮT — dùng bộ câu hỏi sẵn', 'ok');
+    toast(on ? '✨ AI Claude đã BẬT' : 'AI đã TẮT — dùng bộ câu hỏi sẵn', 'ok');
   },
   openAISettings() {
     document.getElementById('ai-key-input').value = AI.key || '';
@@ -954,7 +966,7 @@ const App = {
     if (v) AI.isActive = true; // lưu key mới thì auto bật
     this.closeAISettings();
     this.renderDash();
-    toast(v ? '✨ Đã lưu API key — AI Gemini đã bật' : 'Đã xóa API key', 'ok');
+    toast(v ? '✨ Đã lưu API key — AI Claude đã bật' : 'Đã xóa API key', 'ok');
   },
   clearAIKey() {
     if (!confirm('Xóa API key? AI sẽ tắt, app trở về dùng bộ câu hỏi sẵn.')) return;
@@ -969,11 +981,11 @@ const App = {
     const v = document.getElementById('ai-key-input').value.trim();
     if (!v) { toast('Nhập key trước đã!', 'err'); return; }
     const status = document.getElementById('ai-test-status');
-    status.innerHTML = `<span class="spin">${ICONS.refresh(12)}</span> Đang test với Gemini...`;
+    status.innerHTML = `<span class="spin">${ICONS.refresh(12)}</span> Đang test với Claude...`;
     status.className = 'ai-status';
     try {
       await AI.test(v);
-      status.innerHTML = '✓ Key hợp lệ — Gemini phản hồi OK. Bấm <strong>Lưu</strong> để dùng.';
+      status.innerHTML = '✓ Key hợp lệ — Claude phản hồi OK. Bấm <strong>Lưu</strong> để dùng.';
       status.className = 'ai-status ok';
     } catch (e) {
       status.innerHTML = '✗ Lỗi: ' + esc((e.message || '').substring(0, 120));
@@ -1785,13 +1797,13 @@ function init() {
   if (am) {
     am.addEventListener('click', (e) => { if (e.target.id === 'ai-modal') App.closeAISettings(); });
   }
-  // AI key input — auto-test khi paste 1 key Gemini hợp lệ
+  // AI key input — auto-test khi paste 1 key Claude hợp lệ (sk-ant-...)
   const aiKeyInp = document.getElementById('ai-key-input');
   if (aiKeyInp) {
     aiKeyInp.addEventListener('paste', () => {
       setTimeout(() => {
         const v = aiKeyInp.value.trim();
-        if (v.startsWith('AIza') && v.length > 30) App.testAIKey();
+        if (v.startsWith('sk-ant') && v.length > 30) App.testAIKey();
       }, 60);
     });
   }

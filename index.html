@@ -41,9 +41,9 @@
       </div>
       <div class="divider"></div>
       <div class="field">
-        <div class="label">AI Gemini</div>
+        <div class="label">AI Claude</div>
         <div class="ai-toggle-row">
-          <label class="switch" title="Bật / tắt AI Gemini">
+          <label class="switch" title="Bật / tắt AI Claude">
             <input type="checkbox" id="ai-toggle" onchange="App.toggleAI(this.checked)">
             <span class="slider"></span>
           </label>
@@ -481,38 +481,38 @@
     <div class="modal-header">
       <h3>
         <span class="icon" data-icon="sparkle" data-size="14" style="color:var(--accent)"></span>
-        Cài đặt AI (Gemini)
+        Cài đặt AI (Claude)
       </h3>
       <button class="btn btn-ghost btn-icon" onclick="App.closeAISettings()" title="Đóng (Esc)">
         <span class="icon" data-icon="stop" data-size="12"></span>
       </button>
     </div>
     <div class="modal-body">
-      <p>Dùng <strong>Gemini của Google</strong> để sinh câu hỏi thảo luận tự nhiên, sát chủ đề và trình độ — thay cho bộ câu hỏi sẵn.</p>
+      <p>Dùng <strong>Anthropic Claude</strong> (model Haiku 4.5 — nhanh và rẻ) để sinh câu hỏi thảo luận tự nhiên, sát chủ đề và trình độ.</p>
 
-      <a class="btn btn-primary btn-block ai-cta" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">
+      <a class="btn btn-primary btn-block ai-cta" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">
         <span class="icon" data-icon="sparkle" data-size="13"></span>
-        Mở Google AI Studio để lấy key
+        Mở Anthropic Console để lấy key
         <span style="opacity:.7;font-size:11px;margin-left:4px">(tab mới)</span>
       </a>
 
       <div class="ai-info">
-        <strong>Free tier:</strong> 15 yêu cầu/phút, 1500/ngày. Soạn 1 buổi/ngày dùng ~1 yêu cầu → quá đủ.
+        <strong>Chi phí:</strong> Claude Haiku rất rẻ — khoảng <strong>~25 đồng/buổi học</strong> (10 câu hỏi). Soạn 30 buổi/tháng tốn ~0.1 USD. Phải có credit / payment trong tài khoản Anthropic.
       </div>
 
       <ol class="ai-steps">
-        <li>Bấm nút <strong>"Mở Google AI Studio"</strong> ở trên (đăng nhập Google nếu cần)</li>
-        <li>Bấm <strong>"Create API key"</strong> → copy key bắt đầu bằng <code>AIza...</code></li>
+        <li>Bấm <strong>"Mở Anthropic Console"</strong> ở trên (đăng nhập / đăng ký nếu chưa có)</li>
+        <li>Bấm <strong>"Create Key"</strong> → đặt tên (vd: "Teaching Board") → copy key bắt đầu bằng <code>sk-ant-...</code></li>
         <li>Dán vào ô bên dưới — sẽ <strong>tự động test</strong> ngay</li>
         <li>Bấm <strong>Lưu</strong> → sau đó dùng toggle trên dashboard để bật/tắt</li>
       </ol>
 
       <label class="label" style="margin-top:12px">API key</label>
-      <input id="ai-key-input" class="input input-lg mono" type="password" placeholder="Paste key tại đây — auto-test khi nhận diện AIza..." autocomplete="off" spellcheck="false" />
+      <input id="ai-key-input" class="input input-lg mono" type="password" placeholder="Paste key tại đây — auto-test khi nhận diện sk-ant-..." autocomplete="off" spellcheck="false" />
 
       <div class="ai-privacy">
-        <strong>Vì sao không tự lấy được key?</strong> Google không cho phép app khác tự tạo key giúp (đó là bảo mật của họ — đúng vậy). Bạn chỉ cần làm 1 lần duy nhất, key sẽ lưu trong trình duyệt.<br>
-        Key chỉ lưu trên máy bạn (localStorage), gọi thẳng tới Google, không qua server trung gian.
+        <strong>Vì sao không tự lấy được key?</strong> Anthropic không cho phép app khác tự tạo key giúp (đó là bảo mật chuẩn của họ). Bạn chỉ cần làm 1 lần, key lưu trong trình duyệt.<br>
+        Key chỉ lưu trên máy bạn (localStorage), gọi thẳng tới <code>api.anthropic.com</code>, không qua server trung gian → tài khoản &amp; billing dùng trực tiếp của bạn.
       </div>
 
       <div id="ai-test-status" class="ai-status"></div>
