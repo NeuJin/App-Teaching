@@ -123,6 +123,8 @@ const boardEl = document.getElementById('board');
 function apply(s) {
   if (!s) return;
   topicEl.textContent = s.topic ? s.topic : 'Buổi học tiếng Anh';
+  // Smart auto-scroll: theo dõi đáy nếu HS đang gần đáy; không giật khi HS cuộn lên xem lại
+  const nearBottom = boardEl.scrollHeight - boardEl.scrollTop - boardEl.clientHeight < 24;
   if (s.board && s.board.trim()) {
     boardEl.classList.remove('empty');
     boardEl.textContent = s.board;
@@ -130,6 +132,7 @@ function apply(s) {
     boardEl.classList.add('empty');
     boardEl.textContent = 'Giáo viên sẽ chia sẻ nội dung tại đây ✏️';
   }
+  if (nearBottom) boardEl.scrollTop = boardEl.scrollHeight;
 }
 
 // BroadcastChannel
