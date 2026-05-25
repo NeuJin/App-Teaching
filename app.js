@@ -718,13 +718,26 @@ const S = {
 const Present = {
   ch: ('BroadcastChannel' in window) ? new BroadcastChannel('etb-present') : null,
   state: { topic: '', board: '' },
+  _last: 0,
+  _to: null,
   init() {
-    if (this.ch) this.ch.onmessage = e => { if (e.data && e.data.type === 'hello') this.push(); };
+    if (this.ch) this.ch.onmessage = e => { if (e.data && e.data.type === 'hello') this._flush(); };
   },
   push() {
-    const data = JSON.stringify(this.state);
-    localStorage.setItem('etb_present', data);
-    if (this.ch) this.ch.postMessage(this.state);
+    // Throttle: leading + trailing edge, ~120ms — không lag, không ghi localStorage 30 lần/giây
+    const now = Date.now();
+    const wait = 120 - (now - this._last);
+    if (wait <= 0) { this._last = now; this._flush(); }
+    else if (!this._to) {
+      this._to = setTimeout(() => { this._to = null; this._last = Date.now(); this._flush(); }, wait);
+    }
+  },
+  _flush() {
+    try {
+      const data = JSON.stringify(this.state);
+      localStorage.setItem('etb_present', data);
+      if (this.ch) this.ch.postMessage(this.state);
+    } catch {}
   },
   setTopic(v) { this.state.topic = v; this.push(); },
   setBoard(v) { this.state.board = v; this.push(); },
@@ -1109,10 +1122,14 @@ const App = {
   async autoFillDict(btn) {
     const cards = [...document.querySelectorAll('#vocab-rows .v-card')].filter(c => c.querySelector('.v-w').value.trim());
     if (!cards.length) return 0;
-    let ok = 0;
-    for (let i = 0; i < cards.length; i++) {
-      const card = cards[i], w = card.querySelector('.v-w').value.trim();
-      if (btn) btn.innerHTML = `<span class="spin">${ICONS.refresh(12)}</span> Tra ${i + 1}/${cards.length}`;
+    const total = cards.length;
+    let done = 0, ok = 0;
+    const concurrency = Math.min(5, total); // 5 song song — nhanh ~5x, vẫn lịch sự với API miễn phí
+    const updateBtn = () => { if (btn) btn.innerHTML = `<span class="spin">${ICONS.refresh(12)}</span> Tra ${done}/${total}`; };
+    updateBtn();
+    const queue = cards.slice();
+    const doOne = async (card) => {
+      const w = card.querySelector('.v-w').value.trim();
       try {
         const r = await this.fetchWord(w);
         if (r.ph && !card.querySelector('.v-ph').value) card.querySelector('.v-ph').value = r.ph;
@@ -1121,7 +1138,15 @@ const App = {
         if (r.e && !card.querySelector('.v-e').value) card.querySelector('.v-e').value = r.e;
         ok++;
       } catch {}
-    }
+      done++; updateBtn();
+    };
+    const workers = Array.from({ length: concurrency }, async () => {
+      while (queue.length) {
+        const card = queue.shift();
+        if (card) await doOne(card);
+      }
+    });
+    await Promise.all(workers);
     return ok;
   },
 
